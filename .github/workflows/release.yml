@@ -43,11 +43,11 @@ jobs:
 
       - name: Configure with CMake Preset
         shell: msys2 {0}
-        run: cmake --preset msys2
+        run: cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 
       - name: Build with CMake Preset
         shell: msys2 {0}
-        run: cmake --build --preset msys2
+        run: cmake --build build -j4 --config Release
 
       - name: "Upload artifact"
         uses: actions/upload-artifact@v4
