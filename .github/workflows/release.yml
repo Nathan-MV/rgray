@@ -25,12 +25,15 @@ jobs:
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
+          msystem: ucrt64
           update: true
           install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-ruby
+            base-devel
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-ruby
+            mingw-w64-ucrt-x86_64-raylib
             git
 
       - uses: actions/cache@v4
