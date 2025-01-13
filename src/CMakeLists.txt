@@ -81,9 +81,6 @@ function(setup_library target)
       # NOTE: It seems additional libraries are not required any more, latest GLFW just dlopen them
       # list(APPEND LINK_LIBS Xrandr Xinerama Xi Xxf86vm Xcursor)
     endif()
-    if (${RAYLIB_LIBTYPE} STREQUAL SHARED)
-      list(APPEND LINK_LIBS c)
-    endif()
   elseif (APPLE)
     # Libraries for OSX 10.9 desktop compiling
     # NOTE: Required packages: libopenal-dev libegl1-mesa-dev
