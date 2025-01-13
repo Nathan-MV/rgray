@@ -71,7 +71,7 @@ function(setup_library target)
   elseif (LINUX)
     # Libraries for Debian GNU/Linux desktop compiling
     # NOTE: Required packages: libegl1-mesa-dev
-    set(LINK_LIBS GL m pthread dl rt)
+    #set(LINK_LIBS GL m pthread dl rt)
     if (WAYLAND)
       # On Wayland windowing system, additional libraries requires
       list(APPEND LINK_LIBS wayland-client wayland-cursor wayland-egl xkbcommon)
