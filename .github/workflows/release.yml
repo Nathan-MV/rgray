@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        build_type: [Release, Debug]
+        build_type: [Release]
 
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build gcc g++ libgl1-mesa-dev git
+          sudo apt-get install -y build-essential cmake ninja-build gcc g++ libgl1-mesa-dev git raylib ruby-full
 
       # Caching CPM modules
       - uses: actions/cache@v4
