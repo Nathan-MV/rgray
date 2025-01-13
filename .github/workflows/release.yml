@@ -17,29 +17,38 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-ruby
+            git
+
       - uses: actions/cache@v4
         with:
           path: "**/cpm_modules"
-          key: ${{ matrix.os }}-${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          key: windows-${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
 
-      - name: configure
+      - name: Configure with CMake Preset
+        shell: msys2 {0}
         run: cmake --preset msys2
 
-      - name: build
+      - name: Build with CMake Preset
+        shell: msys2 {0}
         run: cmake --build --preset msys2
 
       - name: "Upload artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ matrix.os }}-artifact"
+          name: "windows-artifact"
           path: |
             ${{ github.workspace }}/build/out
