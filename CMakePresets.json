@@ -1,0 +1,59 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+		  "CMAKE_BUILD_TYPE": "Release",
+		  "CMAKE_EXPORT_COMPILE_COMMANDS": "TRUE"
+      }
+    },
+    {
+      "name": "windows_mri_3_0",
+      "inherits": "default",
+      "displayName": "Windows MRI 3.0",
+      "generator": "MinGW Makefiles",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/Ruby30-x64/msys64/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/Ruby30-x64/msys64/mingw64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "C:/Ruby30-x64/msys64/mingw64/bin/mingw32-make.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "msys2",
+      "inherits": "default",
+      "displayName": "Windows MSYS2",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "C:/msys64/ucrt64/bin/ninja.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows_mri_3_0",
+      "configurePreset": "windows_mri_3_0"
+    },
+    {
+      "name": "msys2",
+      "configurePreset": "msys2"
+    }
+  ]
+}

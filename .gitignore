@@ -1,0 +1,16 @@
+/.cache/
+/build*
+/.vscode
+/cpm_modules
+/project/
+
+# apple
+.DS_Store
+
+# clion
+.idea/
+cmake-*/
+
+# visual studio
+out/
+.vs/
