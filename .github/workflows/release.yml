@@ -56,27 +56,20 @@ jobs:
           path: "**/cpm_modules"
           key: ${{ matrix.os }}-${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
 
-      # Configure CMake for Windows
-      - name: Configure with CMake (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-
-      # Configure CMake for Linux
-      - name: Configure with CMake (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-
       # Build the project on Windows
       - name: Build Project (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
-        run: cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
       # Build the project on Linux
       - name: Build Project (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
       # Upload build artifacts
       - name: Upload Artifact
