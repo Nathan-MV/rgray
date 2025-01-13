@@ -47,11 +47,15 @@ set(SRC_FILES
 )
 
 # ---- Dependencies ----
-
 find_package(Ruby 3.0 REQUIRED)
 
 # ---- Add Libraries ----
+
+# Static library (with -fPIC)
 add_library(${PROJECT_NAME}_mri_static STATIC ${SRC_FILES})
+target_compile_options(${PROJECT_NAME}_mri_static PRIVATE -fPIC)
+
+# Shared library
 add_library(${PROJECT_NAME}_mri SHARED ${SRC_FILES})
 
 # ---- Setup common library properties ----
@@ -70,19 +74,19 @@ function(setup_library target)
       ${reasings_SOURCE_DIR}/src
       ${RUBY_INCLUDE_PATH}
   )
-
-  target_link_libraries(${target} ${PROJECT_NAME}_static ${RUBY_LIBRARY})
-
-  # Set the output extension to `.so` on Windows
-  if(WIN32)
-    set_target_properties(${target} PROPERTIES SUFFIX ".so")
-  endif()
 endfunction()
 
 # ---- Setup static (for executables) and shared (for CRuby extension) libraries ----
-
 setup_library(${PROJECT_NAME}_mri_static)
 setup_library(${PROJECT_NAME}_mri)
+
+# Link dependencies properly
+target_link_libraries(${PROJECT_NAME}_mri PRIVATE ${PROJECT_NAME}_mri_static ${RUBY_LIBRARY})
+
+# Set the output extension to `.so` on Windows
+if(WIN32)
+  set_target_properties(${PROJECT_NAME}_mri PROPERTIES SUFFIX ".so")
+endif()
 
 # Copy Ruby library to output directory
 if(Ruby_FOUND)
