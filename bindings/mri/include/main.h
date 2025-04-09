@@ -20,7 +20,6 @@
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
-#include "math/table_bindings.h"
 #include "system/graphics_bindings.h"
 #include "graphics/gui_bindings.h"
 #include "math/ease_bindings.h"

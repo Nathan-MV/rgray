@@ -14,6 +14,8 @@ CPMAddPackage(NAME raylib
   GIT_TAG ba8460d74cd5086fbdc47a49ce5bb91b1377d1d5
 )
 
+set_target_properties(raylib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 # set(PLATFORM_CPP "PLATFORM_DESKTOP_RGFW")
 #set(GRAPHICS "GRAPHICS_API_OPENGL_43")
 #set(OPENGL_VERSION "4.3")
@@ -25,12 +27,15 @@ CPMAddPackage(NAME raygui
 )
 
 target_compile_definitions(raygui PRIVATE RAYGUI_IMPLEMENTATION)
+set_target_properties(raygui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # reasings
 CPMAddPackage(NAME reasings
   GIT_REPOSITORY https://github.com/Nathan-MV/reasings.git
   GIT_TAG 919079c7a9fb883399f4d4a801ad4132f1f442f5
 )
+
+set_target_properties(reasings PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # rapidcsv
 CPMAddPackage(NAME rapidcsv
@@ -71,7 +76,7 @@ function(setup_library target)
   elseif (LINUX)
     # Libraries for Debian GNU/Linux desktop compiling
     # NOTE: Required packages: libegl1-mesa-dev
-    #set(LINK_LIBS GL m pthread dl rt)
+    set(LINK_LIBS GL m pthread dl rt)
     if (WAYLAND)
       # On Wayland windowing system, additional libraries requires
       list(APPEND LINK_LIBS wayland-client wayland-cursor wayland-egl xkbcommon)

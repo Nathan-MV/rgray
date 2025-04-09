@@ -20,7 +20,6 @@ RUBY_FUNC_EXPORTED void Init_rgray(void) {
   Init_Vec2();
   Init_Vec3();
   Init_Vec4();
-  Init_Table();
   Init_Shader();
   Init_Sprite();
   Init_RenderTexture();

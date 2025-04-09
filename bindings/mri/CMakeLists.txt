@@ -32,7 +32,6 @@ set(SRC_FILES
   src/math/rect_bindings.cpp
   src/math/ring_bindings.cpp
   src/math/spline_bindings.cpp
-  src/math/table_bindings.cpp
   src/math/triangle_bindings.cpp
   src/math/vec2_bindings.cpp
   src/math/vec3_bindings.cpp
@@ -72,6 +71,13 @@ function(setup_library target)
   )
 
   target_link_libraries(${target} ${PROJECT_NAME}_static ${RUBY_LIBRARY})
+
+  # Suppress deprecation warnings
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /wd4996)  # MSVC-specific: ignore deprecated warnings
+  else()
+    target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
+  endif()
 
   # Set the output extension to `.so` on Windows
   if(WIN32)

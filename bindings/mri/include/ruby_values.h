@@ -13,7 +13,6 @@
 #include "graphics/shader_bindings.h"
 #include "graphics/sprite_bindings.h"
 #include "math/rect_bindings.h"
-#include "math/table_bindings.h"
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
