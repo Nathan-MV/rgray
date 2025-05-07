@@ -1,11 +1,6 @@
 #ifndef RAYLIBCRUBY_H
 #define RAYLIBCRUBY_H 1
 
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-
 #include "ruby_values.h"
 #include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
