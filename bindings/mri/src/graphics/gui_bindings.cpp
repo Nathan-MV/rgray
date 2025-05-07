@@ -56,47 +56,47 @@ RB_METHOD_ARG_STR(rb_gui_set_tooltip, GuiSetTooltip, Qnil)
 // Container/separator controls, useful for controls organization
 // RAYGUIAPI int GuiWindowBox(RayRectangle bounds, const char *title);                                       // Window Box control, shows a window that can be closed
 static auto rb_gui_window_box(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *title = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* title = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiWindowBox(*bounds, title);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiGroupBox(RayRectangle bounds, const char *text);                                         // Group Box control with text name
 static auto rb_gui_group_box(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiGroupBox(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiLine(RayRectangle bounds, const char *text);                                             // Line separator control, could contain text
 static auto rb_gui_line(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiLine(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiPanel(RayRectangle bounds, const char *text);                                            // Panel control, useful to group controls
 static auto rb_gui_panel(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiPanel(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiTabBar(RayRectangle bounds, const char **text, int count, int *active);                  // Tab Bar control, returns TAB to be closed or -1
-static auto rb_gui_tab_bar(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_count, VALUE rb_active) {
+static auto rb_gui_tab_bar(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_active) {
   Check_Type(rb_text, T_ARRAY);
   auto text_len = RARRAY_LEN(rb_text);
 
   // Allocate on heap to handle large arrays safely
-  const auto **text = (const char **)calloc(text_len, sizeof(char *));
+  const auto* *text = (const char **)calloc(text_len, sizeof(char *));
   if (text == NULL) {
     rb_raise(rb_eNoMemError, "Failed to allocate memory for text_val");
   }
@@ -106,7 +106,7 @@ static auto rb_gui_tab_bar(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_
     text[i] = StringValueCStr(str);
   }
 
-  auto *bounds = get_rect(rb_bounds);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = NUM2INT(rb_active);
 
   auto result = GuiTabBar(*bounds, text, RARRAY_LEN(rb_text), &active);
@@ -115,49 +115,49 @@ static auto rb_gui_tab_bar(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_
 }
 // RAYGUIAPI int GuiScrollPanel(RayRectangle bounds, const char *text, RayRectangle content, Vector2 *scroll, RayRectangle *view); // Scroll Panel control
 static auto rb_gui_scroll_panel(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_content, VALUE rb_scroll, VALUE rb_view) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
-  auto *content = get_rect(rb_content);
-  auto *scroll = get_vec2(rb_scroll);
-  auto *view = get_rect(rb_view);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
+  auto* content = rb::get_safe<RayRectangle>(rb_content, rb_cRect);
+  auto* scroll = rb::get_safe<Vector2>(rb_scroll, rb_cVec2);
+  auto* view = rb::get_safe<RayRectangle>(rb_view, rb_cRect);
 
   auto result = GuiScrollPanel(*bounds, text, *content, scroll, view);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 
 // Basic controls set
 // RAYGUIAPI int GuiLabel(RayRectangle bounds, const char *text);                                            // Label control
 static auto rb_gui_label(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiLabel(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiButton(RayRectangle bounds, const char *text);                                           // Button control, returns true when clicked
 static auto rb_gui_button(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiButton(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiLabelButton(RayRectangle bounds, const char *text);                                      // Label button control, returns true when clicked
 static auto rb_gui_label_button(VALUE self, VALUE rb_text, VALUE rb_bounds) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiLabelButton(*bounds, text);
 
-  return result ? Qtrue : Qfalse;
+  return result != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiToggle(RayRectangle bounds, const char *text, bool *active);                             // Toggle Button control
 static auto rb_gui_toogle(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_active) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = RTEST(rb_active);
 
   GuiToggle(*bounds, text, &active);
@@ -166,8 +166,8 @@ static auto rb_gui_toogle(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_a
 }
 // RAYGUIAPI int GuiToggleGroup(RayRectangle bounds, const char *text, int *active);                         // Toggle Group control
 static auto rb_gui_toogle_group(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_active) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = NUM2INT(rb_active);
 
   GuiToggleGroup(*bounds, text, &active);
@@ -176,18 +176,18 @@ static auto rb_gui_toogle_group(VALUE self, VALUE rb_text, VALUE rb_bounds, VALU
 }
 // RAYGUIAPI int GuiToggleSlider(RayRectangle bounds, const char *text, int *active);                        // Toggle Slider control
 static auto rb_gui_toogle_slider(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_active) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = NUM2INT(rb_active);
 
   GuiToggleSlider(*bounds, text, &active);
 
-  return active ? Qtrue : Qfalse;
+  return active != 0 ? Qtrue : Qfalse;
 }
 // RAYGUIAPI int GuiCheckBox(RayRectangle bounds, const char *text, bool *checked);                          // Check Box control, returns true when active
 static auto rb_gui_check_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_checked) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto check = RTEST(rb_checked);
 
   GuiCheckBox(*bounds, text, &check);
@@ -196,33 +196,33 @@ static auto rb_gui_check_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE r
 }
 // RAYGUIAPI int GuiComboBox(RayRectangle bounds, const char *text, int *active);                            // Combo Box control
 static auto rb_gui_combo_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_active) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = NUM2INT(rb_active);
 
   auto result = GuiComboBox(*bounds, text, &active);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse, INT2NUM(active));
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, INT2NUM(active));
 }
 
 // RAYGUIAPI int GuiDropdownBox(RayRectangle bounds, const char *text, int *active, bool editMode);          // Dropdown Box control
 static auto rb_gui_dropdown_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_active,
                                 VALUE rb_edit_mode) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto active = NUM2INT(rb_active);
   auto edit_mode = RTEST(rb_edit_mode);
 
   auto result = GuiDropdownBox(*bounds, text, &active, edit_mode);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse, INT2NUM(active));
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, INT2NUM(active));
 }
 
 // RAYGUIAPI int GuiSpinner(RayRectangle bounds, const char *text, int *value, int minValue, int maxValue, bool editMode); // Spinner control
 static auto rb_gui_spinner(VALUE self, VALUE rb_bounds, VALUE rb_value,
                             VALUE rb_min_value, VALUE rb_max_value,
                             VALUE rb_edit_mode) {
-  auto *bounds = get_rect(rb_bounds);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto value = NUM2INT(rb_value);
   auto min_value = NUM2INT(rb_min_value);
   auto max_value = NUM2INT(rb_max_value);
@@ -230,13 +230,13 @@ static auto rb_gui_spinner(VALUE self, VALUE rb_bounds, VALUE rb_value,
 
   auto result = GuiSpinner(*bounds, "", &value, min_value, max_value, edit_mode);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse, INT2NUM(value));
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, INT2NUM(value));
 }
 // RAYGUIAPI int GuiValueBox(RayRectangle bounds, const char *text, int *value, int minValue, int maxValue, bool editMode); // Value Box control, updates input text with numbers
 static auto rb_gui_value_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_value,
                              VALUE rb_min_value, VALUE rb_max_value, VALUE rb_edit_mode) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto value = NUM2INT(rb_value);
   auto minValue = NUM2INT(rb_min_value);
   auto maxValue = NUM2INT(rb_max_value);
@@ -244,15 +244,15 @@ static auto rb_gui_value_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE r
 
   auto result = GuiValueBox(*bounds, text, &value, minValue, maxValue, editMode);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse, INT2NUM(value));
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, INT2NUM(value));
 }
 // RAYGUIAPI int GuiValueBoxFloat(RayRectangle bounds, const char *text, char *textValue, float *value, bool editMode); // Value box control for float values
 static auto rb_gui_value_box_float(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_text_value,
                                    VALUE rb_value, VALUE rb_edit_mode) {
-  const auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
-  auto textValue = StringValueCStr(rb_text_value);
-  float value = NUM2DBL(rb_value);
+  const auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
+  auto* textValue = StringValueCStr(rb_text_value);
+  float value = NUM2FLT(rb_value);
   auto editMode = RTEST(rb_edit_mode);
 
   auto result = GuiValueBoxFloat(*bounds, text, textValue, &value, editMode);
@@ -262,25 +262,25 @@ static auto rb_gui_value_box_float(VALUE self, VALUE rb_text, VALUE rb_bounds, V
 // RAYGUIAPI int GuiTextBox(RayRectangle bounds, char *text, int textSize, bool editMode);                   // Text Box control, updates input text
 static auto rb_gui_text_box(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_text_size,
                             VALUE rb_edit_mode) {
-  auto *text = StringValueCStr(rb_text);
-  auto *bounds = get_rect(rb_bounds);
+  auto* text = StringValueCStr(rb_text);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto textSize = NUM2INT(rb_text_size);
   auto editMode = RTEST(rb_edit_mode);
 
   auto result = GuiTextBox(*bounds, text, textSize, editMode);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse,
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse,
                               rb_str_new_cstr(text));
 }
 
 // RAYGUIAPI int GuiSlider(RayRectangle bounds, const char *textLeft, const char *textRight, float *value, float minValue, float maxValue); // Slider control
 static auto rb_gui_slider(VALUE self, VALUE rb_bounds, VALUE rb_text_left, VALUE rb_text_right, VALUE rb_value, VALUE rb_min_value, VALUE rb_max_value) {
-  // auto *bounds = get_rect(rb_bounds);
+  // auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   // const char *textLeft = StringValueCStr(rb_text_left);
   // const char *textRight = StringValueCStr(rb_text_right);
-  // auto value = NUM2DBL(rb_value);
-  // auto minValue = NUM2DBL(rb_min_value);
-  // auto maxValue = NUM2DBL(rb_max_value);
+  // auto value = NUM2FLT(rb_value);
+  // auto minValue = NUM2FLT(rb_min_value);
+  // auto maxValue = NUM2FLT(rb_max_value);
 
   // auto result = GuiSlider(*bounds, textLeft, textRight, &value, minValue, maxValue);
 
@@ -288,12 +288,12 @@ static auto rb_gui_slider(VALUE self, VALUE rb_bounds, VALUE rb_text_left, VALUE
 }
 // RAYGUIAPI int GuiSliderBar(RayRectangle bounds, const char *textLeft, const char *textRight, float *value, float minValue, float maxValue); // Slider Bar control
 static auto rb_gui_slider_bar(VALUE self, VALUE rb_bounds, VALUE rb_text_left, VALUE rb_text_right, VALUE rb_value, VALUE rb_min_value, VALUE rb_max_value) {
-  // auto *bounds = get_rect(rb_bounds);
+  // auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   // const char *textLeft = StringValueCStr(rb_text_left);
   // const char *textRight = StringValueCStr(rb_text_right);
-  // auto value = NUM2DBL(rb_value);
-  // auto minValue = NUM2DBL(rb_min_value);
-  // auto maxValue = NUM2DBL(rb_max_value);
+  // auto value = NUM2FLT(rb_value);
+  // auto minValue = NUM2FLT(rb_min_value);
+  // auto maxValue = NUM2FLT(rb_max_value);
 
   // auto result = GuiSlider(*bounds, textLeft, textRight, &value, minValue, maxValue);
 
@@ -301,12 +301,12 @@ static auto rb_gui_slider_bar(VALUE self, VALUE rb_bounds, VALUE rb_text_left, V
 }
 // RAYGUIAPI int GuiProgressBar(RayRectangle bounds, const char *textLeft, const char *textRight, float *value, float minValue, float maxValue); // Progress Bar control
 static auto rb_gui_progress_bar(VALUE self, VALUE rb_bounds, VALUE rb_text_left, VALUE rb_text_right, VALUE rb_value, VALUE rb_min_value, VALUE rb_max_value) {
-  // auto *bounds = get_rect(rb_bounds);
+  // auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   // const char *textLeft = StringValueCStr(rb_text_left);
   // const char *textRight = StringValueCStr(rb_text_right);
-  // auto value = NUM2DBL(rb_value);
-  // auto minValue = NUM2DBL(rb_min_value);
-  // auto maxValue = NUM2DBL(rb_max_value);
+  // auto value = NUM2FLT(rb_value);
+  // auto minValue = NUM2FLT(rb_min_value);
+  // auto maxValue = NUM2FLT(rb_max_value);
 
   // auto result = GuiProgressBar(*bounds, textLeft, textRight, &value, minValue, maxValue);
 
@@ -314,7 +314,7 @@ static auto rb_gui_progress_bar(VALUE self, VALUE rb_bounds, VALUE rb_text_left,
 }
 // RAYGUIAPI int GuiStatusBar(RayRectangle bounds, const char *text);                                        // Status Bar control, shows info text
 static auto rb_gui_status_bar(VALUE self, VALUE rb_bounds, VALUE rb_text) {
-  auto *bounds = get_rect(rb_bounds);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   const char *text = StringValueCStr(rb_text);
 
   GuiStatusBar(*bounds, text);
@@ -323,7 +323,7 @@ static auto rb_gui_status_bar(VALUE self, VALUE rb_bounds, VALUE rb_text) {
 }
 // RAYGUIAPI int GuiDummyRec(RayRectangle bounds, const char *text);                                         // Dummy control for placeholders
 static auto rb_gui_dummy_rec(VALUE self, VALUE rb_bounds, VALUE rb_text) {
-  auto *bounds = get_rect(rb_bounds);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   const char *text = StringValueCStr(rb_text);
 
   GuiDummyRec(*bounds, text);
@@ -331,17 +331,17 @@ static auto rb_gui_dummy_rec(VALUE self, VALUE rb_bounds, VALUE rb_text) {
   return Qnil;
 }
 // RAYGUIAPI int GuiGrid(RayRectangle bounds, const char *text, float spacing, int subdivs, Vector2 *mouseCell); // Grid control
-static auto rb_gui_grid(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_spacing, VALUE rb_subdivs, VALUE rb_mouse_ceell) {
-  auto *bounds = get_rect(rb_bounds);
+static auto rb_gui_grid(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_spacing, VALUE rb_subdivs, VALUE rb_mouse_cell) {
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   const char *text = StringValueCStr(rb_text);
-  auto spacing = NUM2DBL(rb_spacing);
+  auto spacing = NUM2FLT(rb_spacing);
   auto subdivs = NUM2INT(rb_subdivs);
-  auto *mouseCell = get_vec2(rb_mouse_ceell);
+  auto* mouseCell = rb::get_safe<Vector2>(rb_mouse_cell, rb_cVec2);
 
   auto result = GuiGrid(*bounds, text, spacing, subdivs, mouseCell);
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse,
-                              INT2NUM(mouseCell->x), INT2NUM(mouseCell->y));
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse,
+                              DBL2NUM(mouseCell->x), DBL2NUM(mouseCell->y));
 }
 
 // Advance controls set
@@ -354,7 +354,7 @@ static auto rb_gui_list_view_ex(VALUE self, VALUE rb_text, VALUE rb_bounds, VALU
   auto text_len = RARRAY_LEN(rb_text);
 
   // Allocate on heap to handle large arrays safely
-  const auto **text = (const char **)calloc(text_len, sizeof(char *));
+  const auto* *text = (const char **)calloc(text_len, sizeof(char *));
   if (text == NULL) {
     rb_raise(rb_eNoMemError, "Failed to allocate memory for text_val");
   }
@@ -364,7 +364,7 @@ static auto rb_gui_list_view_ex(VALUE self, VALUE rb_text, VALUE rb_bounds, VALU
     text[i] = StringValueCStr(str);
   }
 
-  auto *bounds = get_rect(rb_bounds);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto scrollIndex = NUM2INT(rb_scroll_index);
   auto active = NUM2INT(rb_active);
@@ -377,10 +377,10 @@ static auto rb_gui_list_view_ex(VALUE self, VALUE rb_text, VALUE rb_bounds, VALU
 }
 // RAYGUIAPI int GuiMessageBox(RayRectangle bounds, const char *title, const char *message, const char *buttons); // Message Box control, displays a message
 static  auto rb_gui_message_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VALUE rb_message, VALUE rb_buttons) {
-  const auto *title_str = StringValueCStr(rb_title);
-  const auto *message_str = StringValueCStr(rb_message);
-  const auto *buttons_str = StringValueCStr(rb_buttons);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* title_str = StringValueCStr(rb_title);
+  const auto* message_str = StringValueCStr(rb_message);
+  const auto* buttons_str = StringValueCStr(rb_buttons);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
   auto result = GuiMessageBox(*bounds, title_str, message_str, buttons_str);
 
@@ -390,10 +390,10 @@ static  auto rb_gui_message_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VAL
 static auto rb_gui_text_input_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VALUE rb_message,
                                   VALUE rb_buttons, VALUE rb_text, VALUE rb_text_max_size,
                                   VALUE rb_secret_view_active) {
-  const auto *title_str = StringValueCStr(rb_title);
-  const auto *message_str = StringValueCStr(rb_message);
-  const auto *buttons_str = StringValueCStr(rb_buttons);
-  auto *bounds = get_rect(rb_bounds);
+  const auto* title_str = StringValueCStr(rb_title);
+  const auto* message_str = StringValueCStr(rb_message);
+  const auto* buttons_str = StringValueCStr(rb_buttons);
+  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
   auto textMaxSize = NUM2INT(rb_text_max_size);
 
   // Create a buffer for text that can be modified
@@ -410,13 +410,13 @@ static auto rb_gui_text_input_box(VALUE self, VALUE rb_bounds, VALUE rb_title, V
   VALUE ret_text = rb_str_new_cstr(text_buf);
   xfree(text_buf);  // Free the buffer after use
 
-  return rb_ary_new_from_args(2, result ? Qtrue : Qfalse, ret_text);
+  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, ret_text);
 }
 // RAYGUIAPI int GuiColorPicker(RayRectangle bounds, const char *text, Color *color);                        // Color Picker control (multiple color controls)
 static auto rb_gui_color_picker(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_color) {
-  // auto *bounds = get_rect(rb_bounds);
-  // const auto *text_str = StringValueCStr(rb_text);
-  // auto *color = get_color(rb_color);
+  // auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
+  // const auto* text_str = StringValueCStr(rb_text);
+  // auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
   // auto result = GuiColorPicker(*bounds, text_str, color);
 
@@ -460,7 +460,7 @@ extern "C" void Init_Gui() {
   rb_define_module_function(rb_mGui, "group_box", rb_gui_group_box, 2);
   rb_define_module_function(rb_mGui, "line", rb_gui_line, 2);
   rb_define_module_function(rb_mGui, "panel", rb_gui_panel, 2);
-  rb_define_module_function(rb_mGui, "tab_bar", rb_gui_tab_bar, 4);
+  rb_define_module_function(rb_mGui, "tab_bar", rb_gui_tab_bar, 3);
   rb_define_module_function(rb_mGui, "scroll_panel", rb_gui_scroll_panel, 5);
 
   rb_define_module_function(rb_mGui, "label", rb_gui_label, 2);

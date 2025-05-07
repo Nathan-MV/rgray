@@ -5,6 +5,18 @@
 [![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/Install/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
 [![codecov](https://codecov.io/gh/TheLartians/ModernCppStarter/branch/master/graph/badge.svg)](https://codecov.io/gh/TheLartians/ModernCppStarter)
 
+Conflicting Functions from Raylibb
+Rectangle
+CloseWindow
+ShowCursor
+PlaySound
+DrawText
+DrawTextEx
+LoadImage
+
+Install msys2 with Ruby
+pacman -S mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ccache mingw-w64-ucrt-x86_64-clang-tools-extra mingw-w64-ucrt-x86_64-cppcheck
+
 <p align="center">
   <img src="https://repository-images.githubusercontent.com/254842585/4dfa7580-7ffb-11ea-99d0-46b8fe2f4170" height="175" width="auto" />
 </p>

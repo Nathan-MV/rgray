@@ -1,45 +1,38 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 extern VALUE rb_cCamera;
 extern "C" void Init_Camera();
 
-inline Camera2D *get_camera(VALUE obj) {
-  Camera2D *camera;
-  Data_Get_Struct(obj, Camera2D, camera);
-
-  return camera;
-}
-
-#define RB_CAMERA_GETTER_VEC2(name, member)                           \
-  static VALUE name(VALUE self) {                                     \
-    Camera2D *camera = get_camera(self);                              \
-    Vector2 *vec2 = &camera->member;                                  \
-    return Data_Wrap_Struct(rb_cVec2, NULL, rb_object_free<Vector2>, vec2); \
+#define RB_METHOD_CAMERA_GETTER_VEC2(name, member)                           \
+  static VALUE name(VALUE self) {                                            \
+    auto& camera = rb::get<Camera2D>(self);                                         \
+    return rb::alloc_borrowed<Vector2>(rb_cVec2, &camera.member);                                        \
   }
 
-#define RB_CAMERA_SETTER_VEC2(name, member)    \
+#define RB_METHOD_CAMERA_SETTER_VEC2(name, member)    \
   static VALUE name(VALUE self, VALUE value) { \
-    Camera2D *camera = get_camera(self);       \
-    Vector2 *vec2 = get_vec2(value);       \
-    camera->member = *vec2;                \
+    auto& camera = rb::get<Camera2D>(self);       \
+    auto* vec2 = rb::get_safe<Vector2>(value, rb_cVec2);       \
+    camera.member = *vec2;                \
     return self;                               \
   }
 
-#define RB_CAMERA_GETTER(name, member)   \
+#define RB_METHOD_CAMERA_GETTER(name, member)   \
   static VALUE name(VALUE self) {        \
-    Camera2D *camera = get_camera(self); \
+    auto& camera = rb::get<Camera2D>(self); \
                                          \
-    return DBL2NUM(camera->member);      \
+    return DBL2NUM(camera.member);      \
   }
 
-#define RB_CAMERA_SETTER(name, member)         \
+#define RB_METHOD_CAMERA_SETTER(name, member)         \
   static VALUE name(VALUE self, VALUE value) { \
-    Camera2D *camera = get_camera(self);       \
-    camera->member = NUM2DBL(value);           \
+    auto& camera = rb::get<Camera2D>(self);       \
+    camera.member = NUM2FLT(value);           \
     return self;                               \
   }
 

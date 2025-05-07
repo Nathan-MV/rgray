@@ -1,60 +1,41 @@
 #ifndef RENDER_TEXTURE_H
 #define RENDER_TEXTURE_H
 
-#include "../ruby_values.h"
+#include "graphics/sprite_bindings.h"
 #include "rgray/raylib_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 
 extern VALUE rb_cRenderTexture;
 extern "C" void Init_RenderTexture();
 
-inline RenderTexture2D *get_render_texture(VALUE obj) {
-  RenderTexture2D *texture;
-  if (!obj || !rb_obj_is_kind_of(obj, rb_cRenderTexture)) {
-    rb_raise(rb_eTypeError, "Expected a RenderTexture object.");
-    return nullptr;
-  }
-  Data_Get_Struct(obj, RenderTexture2D, texture);
-  if (!texture) {
-    rb_raise(rb_eRuntimeError, "Failed to retrieve RenderTexture data.");
-  }
-  return texture;
+// Free the RenderTexture2D object
+// This function is called when the Ruby object is garbage collected
+template <class T>
+void free_render_texture(void* data) {
+	T* ptr = reinterpret_cast<T*>(data);
+	UnloadRenderTexture(*ptr);
+	delete ptr;
 }
 
-template <typename T> void rb_render_texture_free(void *ptr) {
-  T *obj = static_cast<T *>(ptr);
-  if (obj) {
-    UnloadRenderTexture(*obj);
-    delete obj;
-  }
-}
-
-template <typename T> VALUE rb_render_texture_alloc(VALUE klass) {
-  try {
-    T *obj = new T();
-    return Data_Wrap_Struct(klass, nullptr, rb_render_texture_free<T>, obj);
-  } catch (const std::bad_alloc &e) {
-    rb_raise(rb_eNoMemError, "Failed to allocate memory for %s.", typeid(T).name());
-    return Qnil;
-  } catch (...) {
-    rb_raise(rb_eRuntimeError, "An unexpected error occurred while allocating RenderTexture.");
-    return Qnil;
-  }
+// Allocates and wraps a new instance of RenderTexture2D
+// This function is called when the Ruby object is created
+template <class T>
+VALUE alloc_render_texture(VALUE klass) {
+	return Data_Wrap_Struct(klass, rb::mark<T>, free_render_texture<T>, new T());
 }
 
 // Macro to define getter methods
 #define RB_RENDER_TEXTURE_GETTER_UINT(name, member)             \
   static VALUE name(VALUE self) {                               \
-    RenderTexture2D *render_texture = get_render_texture(self); \
-    if (!render_texture) return Qnil;                           \
-    return UINT2NUM(render_texture->member);                 \
+    auto& render_texture = rb::get<RenderTexture2D>(self);            \
+    return UINT2NUM(render_texture.member);                    \
   }
 
-#define RB_RENDER_TEXTURE_GETTER_TEXTURE(name, member)                    \
-  static VALUE name(VALUE self) {                                         \
-    RenderTexture2D *render_texture = get_render_texture(self);           \
-    if (!render_texture) return Qnil;                                     \
-    return Data_Wrap_Struct(rb_cSprite, nullptr, rb_object_free<Texture2D>, \
-                            &render_texture->member);                     \
+#define RB_RENDER_TEXTURE_GETTER_TEXTURE(name, member)          \
+  static VALUE name(VALUE self) {                               \
+    auto& render_texture = rb::get<RenderTexture2D>(self);            \
+    return rb::alloc_borrowed<Texture2D>(rb_cSprite, &render_texture.member); \
   }
 
 #endif  // RENDER_TEXTURE_H

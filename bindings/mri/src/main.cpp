@@ -1,6 +1,12 @@
 #include <main.h>
 
-RUBY_FUNC_EXPORTED void Init_rgray(void) {
+VALUE rb_mRGRAY = Qnil;
+VALUE rb_eRGRAYError = Qnil;
+
+extern "C" void Init_rgray(void) {
+  rb_mRGRAY = rb_define_module("RGRAY");
+  rb_eRGRAYError = rb_define_class_under(rb_mRGRAY, "Error", rb_eStandardError);
+
   Init_Kernel();
 
   // Modules
@@ -13,6 +19,7 @@ RUBY_FUNC_EXPORTED void Init_rgray(void) {
   Init_Draw();
   Init_Shapes();
   Init_Audio();
+  Init_Math();
 
   // Classes
   Init_Color();
@@ -42,90 +49,90 @@ RUBY_FUNC_EXPORTED void Init_rgray(void) {
 //   ruby_init();
 // }
 
-static auto initializeRubyArguments() {
-  const char *args[] = {"ruby", "-e", "--yjit"};  //, "--parser=prism"};
-  auto argc = sizeof(args) / sizeof(args[0]);
-  ruby_options(argc, const_cast<char **>(args));
-}
+// static auto initializeRubyArguments() {
+//   const char *args[] = {"ruby", "-e", "--yjit"};  //, "--parser=prism"};
+//   auto argc = sizeof(args) / sizeof(args[0]);
+//   ruby_options(argc, const_cast<char **>(args));
+// }
 
-static auto rubyScriptLoad(VALUE scriptPath) {
-  rb_ary_push(rb_gv_get("$LOAD_PATH"), scriptPath);
-  rb_load(scriptPath, 0);
-  return Qnil;
-}
+// static auto rubyScriptLoad(VALUE scriptPath) {
+//   rb_ary_push(rb_gv_get("$LOAD_PATH"), scriptPath);
+//   rb_load(scriptPath, 0);
+//   return Qnil;
+// }
 
-static VALUE handleRubyException(VALUE, VALUE exc) {
-  // Separator for clarity in the error message
-  const std::string separator(100, '-');
+// static VALUE handleRubyException(VALUE, VALUE exc) {
+//   // Separator for clarity in the error message
+//   const std::string separator(100, '-');
 
-  // Retrieve exception details with safety checks
-  VALUE message = rb_funcall(exc, rb_intern("message"), 0);
-  VALUE exception_name = rb_class_path(rb_obj_class(exc));
-  VALUE backtrace = rb_funcall(exc, rb_intern("backtrace"), 0);
+//   // Retrieve exception details with safety checks
+//   VALUE message = rb_funcall(exc, rb_intern("message"), 0);
+//   VALUE exception_name = rb_class_path(rb_obj_class(exc));
+//   VALUE backtrace = rb_funcall(exc, rb_intern("backtrace"), 0);
 
-  // Verify that message, exception_name, and backtrace are non-nil
-  if (NIL_P(message) || NIL_P(exception_name) || NIL_P(backtrace)) {
-    std::cerr << "Error: Unable to retrieve exception details (one or more values are nil)."
-              << std::endl;
-    return Qnil;
-  }
+//   // Verify that message, exception_name, and backtrace are non-nil
+//   if (NIL_P(message) || NIL_P(exception_name) || NIL_P(backtrace)) {
+//     std::cerr << "Error: Unable to retrieve exception details (one or more values are nil)."
+//               << std::endl;
+//     return Qnil;
+//   }
 
-  // Attempt to convert Ruby values to C strings, handle failures gracefully
-  const char *message_str = nullptr, *exception_name_str = nullptr;
-  try {
-    message_str = StringValueCStr(message);
-    exception_name_str = StringValueCStr(exception_name);
-  } catch (...) {
-    std::cerr << "Error: Failed to convert exception message or class name to string." << std::endl;
-    return Qnil;
-  }
+//   // Attempt to convert Ruby values to C strings, handle failures gracefully
+//   const char *message_str = nullptr, *exception_name_str = nullptr;
+//   try {
+//     message_str = StringValueCStr(message);
+//     exception_name_str = StringValueCStr(exception_name);
+//   } catch (...) {
+//     std::cerr << "Error: Failed to convert exception message or class name to string." << std::endl;
+//     return Qnil;
+//   }
 
-  VALUE first_line = rb_ary_entry(backtrace, 0);
-  const char *file_str = NIL_P(first_line) ? "Unknown" : StringValueCStr(first_line);
+//   VALUE first_line = rb_ary_entry(backtrace, 0);
+//   const char *file_str = NIL_P(first_line) ? "Unknown" : StringValueCStr(first_line);
 
-  std::ostringstream result;
-  result << separator << "\n"
-         << "File: " << file_str << "\n"
-         << "Class: " << exception_name_str << "\n"
-         << "Message: " << message_str << "\n"
-         << separator << "\n"
-         << "Backtrace:\n";
+//   std::ostringstream result;
+//   result << separator << "\n"
+//          << "File: " << file_str << "\n"
+//          << "Class: " << exception_name_str << "\n"
+//          << "Message: " << message_str << "\n"
+//          << separator << "\n"
+//          << "Backtrace:\n";
 
-  // Process and append each entry in the backtrace
-  long backtrace_length = RARRAY_LEN(backtrace);
-  for (long i = 1; i < backtrace_length; ++i) {
-    VALUE bt_entry = rb_ary_entry(backtrace, i);
-    if (NIL_P(bt_entry)) continue;  // Skip nil entries in the backtrace
+//   // Process and append each entry in the backtrace
+//   long backtrace_length = RARRAY_LEN(backtrace);
+//   for (long i = 1; i < backtrace_length; ++i) {
+//     VALUE bt_entry = rb_ary_entry(backtrace, i);
+//     if (NIL_P(bt_entry)) continue;  // Skip nil entries in the backtrace
 
-    // Attempt to convert each backtrace entry to a C string
-    const char *bt_entry_str = nullptr;
-    try {
-      bt_entry_str = StringValueCStr(bt_entry);
-    } catch (...) {
-      std::cerr << "Warning: Skipping invalid backtrace entry at index " << i << std::endl;
-      continue;
-    }
-    result << "\tfrom " << bt_entry_str << "\n";
-  }
+//     // Attempt to convert each backtrace entry to a C string
+//     const char *bt_entry_str = nullptr;
+//     try {
+//       bt_entry_str = StringValueCStr(bt_entry);
+//     } catch (...) {
+//       std::cerr << "Warning: Skipping invalid backtrace entry at index " << i << std::endl;
+//       continue;
+//     }
+//     result << "\tfrom " << bt_entry_str << "\n";
+//   }
 
-  result << separator;
+//   result << separator;
 
-  // Output the constructed error message
-  std::cerr << result.str() << std::endl;
+//   // Output the constructed error message
+//   std::cerr << result.str() << std::endl;
 
-  return Qnil;
-}
+//   return Qnil;
+// }
 
-static VALUE script_rescue(VALUE, VALUE exc) {
-  VALUE backtrace = rb_ary_to_ary(rb_funcall(exc, rb_intern("backtrace"), 0));
-  VALUE message = rb_str_to_str(rb_funcall(exc, rb_intern("message"), 0));
-  std::cerr << StringValueCStr(message) << std::endl;
-  for (long i = 0; i < RARRAY_LEN(backtrace); ++i) {
-    VALUE lp = rb_str_to_str(rb_ary_entry(backtrace, i));
-    std::cerr << StringValueCStr(lp) << std::endl;
-  }
-  return Qnil;
-}
+// static VALUE script_rescue(VALUE, VALUE exc) {
+//   VALUE backtrace = rb_ary_to_ary(rb_funcall(exc, rb_intern("backtrace"), 0));
+//   VALUE message = rb_str_to_str(rb_funcall(exc, rb_intern("message"), 0));
+//   std::cerr << StringValueCStr(message) << std::endl;
+//   for (long i = 0; i < RARRAY_LEN(backtrace); ++i) {
+//     VALUE lp = rb_str_to_str(rb_ary_entry(backtrace, i));
+//     std::cerr << StringValueCStr(lp) << std::endl;
+//   }
+//   return Qnil;
+// }
 
 // auto main(int argc, char **argv) -> int {
 //   initializeRubyInterpreter();
@@ -186,6 +193,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  ruby_sysinit(&argc, (char ***)&argv);
+  ruby_sysinit(&argc, reinterpret_cast<char ***>(&argv));
   return initializeRubyInterpreter(scriptPath);
 }

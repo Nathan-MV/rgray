@@ -2,7 +2,8 @@
 #define BITMAP_H
 
 #include <stdio.h>
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 extern VALUE rb_cBitmap;
@@ -15,25 +16,20 @@ extern "C" inline Image* get_image(VALUE obj) {
   return img;
 }
 
-template <typename T>
-void rb_image_free(void *ptr) {
-  T *obj = static_cast<T *>(ptr);
-
-  UnloadImage(*obj);
-  delete obj;
+// Free the Image object
+// This function is called when the Ruby object is garbage collected
+template <class T>
+void free_image(void* data) {
+	T* ptr = reinterpret_cast<T*>(data);
+	UnloadImage(*ptr);
+	delete ptr;
 }
 
-template <typename T>
-VALUE rb_image_alloc(VALUE klass) {
-  T *obj = (T *)malloc(sizeof(T));
-
-  if (!obj) {
-    rb_raise(rb_eNoMemError, "Failed to allocate memory for %s.", typeid(T).name());
-
-    return Qnil;
-  }
-
-  return Data_Wrap_Struct(klass, nullptr, rb_image_free<T>, obj);
+// Allocates and wraps a new instance of Image
+// This function is called when the Ruby object is created
+template <class T>
+VALUE alloc_image(VALUE klass) {
+	return Data_Wrap_Struct(klass, rb::mark<T>, free_image<T>, new T());
 }
 
 #endif // BITMAP_H

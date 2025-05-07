@@ -4,84 +4,90 @@
 VALUE rb_cVec2;
 
 static auto rb_vec2_initialize(int argc, VALUE *argv, VALUE self) {
-  auto *vec2 = get_vec2(self);
+  auto& vec2 = rb::get<Vector2>(self);
 
   // Default values
-  auto x = 0.0f;
-  auto y = 0.0f;
+  auto x = 0.0F;
+  auto y = 0.0F;
 
   // Parse arguments
   if (argc > 0) {
-    x = NUM2DBL(argv[0]);
-    y = NUM2DBL(argv[1]);
+    x = NUM2FLT(argv[0]);
+    y = NUM2FLT(argv[1]);
   }
 
-  vec2->x = x;
-  vec2->y = y;
+  vec2.x = x;
+  vec2.y = y;
 
   return self;
 }
 
-RB_VEC2_GETTER(rb_vec2_get_x, x)
-RB_VEC2_GETTER(rb_vec2_get_y, y)
-RB_VEC2_SETTER(rb_vec2_set_x, x)
-RB_VEC2_SETTER(rb_vec2_set_y, y)
-RB_VEC2_FLOAT(rb_vec2_length, Vector2Length)
-RB_VEC2_FLOAT(rb_vec2_length_sqr, Vector2LengthSqr)
-RB_VEC2_OTHER_FLOAT(rb_vec2_dot_product, Vector2DotProduct)
-RB_VEC2_OTHER_FLOAT(rb_vec2_distance, Vector2Distance)
-RB_VEC2_OTHER_FLOAT(rb_vec2_distance_sqr, Vector2DistanceSqr)
-RB_VEC2_OTHER_FLOAT(rb_vec2_angle, Vector2Angle)
-RB_VEC2(rb_vec2_negate, Vector2Negate)
-RB_VEC2(rb_vec2_normalize, Vector2Normalize)
+RB_METHOD_VEC2_GETTER(rb_vec2_get_x, x)
+RB_METHOD_VEC2_GETTER(rb_vec2_get_y, y)
+RB_METHOD_VEC2_SETTER(rb_vec2_set_x, x)
+RB_METHOD_VEC2_SETTER(rb_vec2_set_y, y)
+// RMAPI Vector2 Vector2Add(Vector2 v1, Vector2 v2) // Add two vectors (v1 + v2)
+RB_METHOD_VEC2_SCALAR(rb_vec2_add_scalar, Vector2Add, Vector2AddValue)
+RB_METHOD_VEC2_SCALAR(rb_vec2_subtract_scalar, Vector2Subtract, Vector2SubtractValue)
+RB_METHOD_VEC2_SCALAR(rb_vec2_multiply_scalar, Vector2Multiply, Vector2Scale)
+RB_METHOD_VEC2_SCALAR(rb_vec2_divide_scalar, Vector2Divide, Vector2DivideValue)
+// RMAPI float Vector2Length(Vector2 v) // Calculate vector length
+RB_METHOD_VEC2_FLOAT(rb_vec2_length, Vector2Length)
+RB_METHOD_VEC2_FLOAT(rb_vec2_length_sqr, Vector2LengthSqr)
+RB_METHOD_VEC2_OTHER_FLOAT(rb_vec2_dot_product, Vector2DotProduct)
+RB_METHOD_VEC2_OTHER_FLOAT(rb_vec2_distance, Vector2Distance)
+RB_METHOD_VEC2_OTHER_FLOAT(rb_vec2_distance_sqr, Vector2DistanceSqr)
+RB_METHOD_VEC2_OTHER_FLOAT(rb_vec2_angle, Vector2Angle)
+RB_METHOD_VEC2(rb_vec2_negate, Vector2Negate)
+RB_METHOD_VEC2(rb_vec2_normalize, Vector2Normalize)
 
 static auto rb_vec2_lerp(VALUE self, VALUE other, VALUE amount) {
-  auto *vec2 = get_vec2(self);
-  auto *other_vec2 = get_vec2(other);
-  auto amt = NUM2DBL(amount);
+  auto& vec2 = rb::get<Vector2>(self);
+  auto* other_vec2 = rb::get_safe<Vector2>(other, rb_cVec2);
+  auto amt = NUM2FLT(amount);
 
-  *vec2 = Vector2Lerp(*vec2, *other_vec2, amt);
+  vec2 = Vector2Lerp(vec2, *other_vec2, amt);
 
   return self;
 }
 
-RB_VEC2_OTHER(rb_vec2_reflect, Vector2Reflect)
+RB_METHOD_VEC2_OTHER(rb_vec2_reflect, Vector2Reflect)
 
 static auto rb_vec2_rotate(VALUE self, VALUE angle) {
-  auto *vec2 = get_vec2(self);
-  auto ang = NUM2DBL(angle);
+  auto& vec2 = rb::get<Vector2>(self);
+  auto ang = NUM2FLT(angle);
 
-  *vec2 = Vector2Rotate(*vec2, ang);
+  vec2 = Vector2Rotate(vec2, ang);
 
   return self;
 }
 
 static auto rb_vec2_move_towards(VALUE self, VALUE target, VALUE max_distance) {
-  auto *vec2 = get_vec2(self);
-  auto *tarGET_VEC2 = get_vec2(target);
-  auto max = NUM2DBL(max_distance);
+  auto& vec2 = rb::get<Vector2>(self);
+  auto* target_vec2 = rb::get_safe<Vector2>(target, rb_cVec2);
+  auto max = NUM2FLT(max_distance);
 
-  *vec2 = Vector2MoveTowards(*vec2, *tarGET_VEC2, max);
+  vec2 = Vector2MoveTowards(vec2, *target_vec2, max);
 
   return self;
 }
 
-RB_VEC2(rb_vec2_invert, Vector2Invert)
+RB_METHOD_VEC2(rb_vec2_invert, Vector2Invert)
 
 static auto rb_vec2_clamp(int argc, VALUE *argv, VALUE self) {
-  auto *vec2 = get_vec2(self);
+  auto& vec2 = rb::get<Vector2>(self);
 
   if (argc == 1) {
     VALUE arg = argv[0];
 
     if (rb_obj_is_kind_of(arg, rb_cVec2)) {
-      auto *clamp_vec = get_vec2(arg);
+      auto* clamp_vec = rb::get_safe<Vector2>(arg, rb_cVec2);
 
       Vector2 result = {
-          std::clamp(vec2->x, 0.0f, clamp_vec->x),
-          std::clamp(vec2->y, 0.0f, clamp_vec->y)
+          std::clamp(vec2.x, 0.0F, clamp_vec->x),
+          std::clamp(vec2.y, 0.0F, clamp_vec->y)
       };
-      *vec2 = result;
+      vec2 = result;
     } else {
       rb_raise(rb_eArgError, "Invalid argument type");
     }
@@ -90,13 +96,13 @@ static auto rb_vec2_clamp(int argc, VALUE *argv, VALUE self) {
     VALUE arg2 = argv[1];
 
     if (rb_obj_is_kind_of(arg1, rb_cVec2) && rb_obj_is_kind_of(arg2, rb_cVec2)) {
-      auto *min_vec2 = get_vec2(arg1);
-      auto *max_vec2 = get_vec2(arg2);
-      *vec2 = Vector2Clamp(*vec2, *min_vec2, *max_vec2);
+      auto* min_vec2 = rb::get_safe<Vector2>(arg1, rb_cVec2);
+      auto* max_vec2 = rb::get_safe<Vector2>(arg2, rb_cVec2);
+      vec2 = Vector2Clamp(vec2, *min_vec2, *max_vec2);
     } else if (RB_FLOAT_TYPE_P(arg1) && RB_FLOAT_TYPE_P(arg2)) {
-      auto min = NUM2DBL(arg1);
-      auto max = NUM2DBL(arg2);
-      *vec2 = Vector2ClampValue(*vec2, min, max);
+      auto min = NUM2FLT(arg1);
+      auto max = NUM2FLT(arg2);
+      vec2 = Vector2ClampValue(vec2, min, max);
     } else {
       rb_raise(rb_eArgError, "Invalid argument types");
     }
@@ -107,35 +113,30 @@ static auto rb_vec2_clamp(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
-RB_VEC2_OTHER_INT(rb_vec2_equals, Vector2Equals)
+RB_METHOD_VEC2_OTHER_INT(rb_vec2_equals, Vector2Equals)
 
 static auto rb_vec2_set(VALUE self, VALUE x, VALUE y) {
-  auto *vec2 = get_vec2(self);
+  auto& vec2 = rb::get<Vector2>(self);
 
-  vec2->x = NUM2INT(x);
-  vec2->y = NUM2INT(y);
+  vec2.x = NUM2INT(x);
+  vec2.y = NUM2INT(y);
 
   return self;
 }
 
-RB_VEC2_SCALAR(rb_vec2_add_scalar, Vector2Add, Vector2AddValue)
-RB_VEC2_SCALAR(rb_vec2_subtract_scalar, Vector2Subtract, Vector2SubtractValue)
-RB_VEC2_SCALAR(rb_vec2_multiply_scalar, Vector2Multiply, Vector2Scale)
-RB_VEC2_SCALAR(rb_vec2_divide_scalar, Vector2Divide, Vector2DivideValue)
-
 static auto rb_vec2_screen_bounds(VALUE self, VALUE size_val) {
-  auto *vec2 = get_vec2(self);
-  auto [x, y] = std::make_pair(vec2->x, vec2->y);
+  auto& vec2 = rb::get<Vector2>(self);
+  auto [x, y] = std::make_pair(vec2.x, vec2.y);
   double size_x, size_y;
 
   if (rb_obj_is_kind_of(size_val, rb_cVec2)) {
-    auto *size_vec2 = get_vec2(size_val);
+    auto* size_vec2 = rb::get_safe<Vector2>(size_val, rb_cVec2);
     std::tie(size_x, size_y) = std::make_pair(size_vec2->x, size_vec2->y);
   } else if (rb_obj_is_kind_of(size_val, rb_cSprite)) {
-    auto *texture = get_texture(size_val);
+    auto* texture = rb::get_safe<Texture2D>(size_val, rb_cSprite);
     std::tie(size_x, size_y) = std::make_pair(texture->width, texture->height);
   } else {
-    size_x = size_y = NUM2DBL(size_val);
+    size_x = size_y = NUM2FLT(size_val);
   }
 
   auto [width, height] = std::make_pair(GetScreenWidth(), GetScreenHeight());
@@ -148,11 +149,11 @@ static auto rb_vec2_screen_bounds(VALUE self, VALUE size_val) {
 }
 
 static auto rb_random_movement(int argc, VALUE *argv, VALUE self) {
-  auto *position = get_vec2(self);
+  auto& position = rb::get<Vector2>(self);
   VALUE direction_sym = Qnil, speed;
   rb_scan_args(argc, argv, "11", &speed, &direction_sym);
 
-  auto speed_value = NUM2DBL(speed);
+  auto speed_value = NUM2FLT(speed);
   std::string direction;
 
   if (!NIL_P(direction_sym)) {
@@ -170,30 +171,30 @@ static auto rb_random_movement(int argc, VALUE *argv, VALUE self) {
     }
   }
 
-  Vector2RandomMovement(*position, speed_value, direction);
+  Vector2RandomMovement(position, speed_value, direction);
 
   return self;
 }
 
 static auto rb_vec2_is_zero(VALUE self) {
-  auto *vec2 = get_vec2(self);
+  auto& vec2 = rb::get<Vector2>(self);
 
-  auto result = Vector2IsZero(*vec2);
+  auto result = Vector2IsZero(vec2);
 
   return result ? Qtrue : Qfalse;
 }
 
 static auto rb_vec2_to_string(VALUE self) {
-  auto *vec2 = get_vec2(self);
+  auto& vec2 = rb::get<Vector2>(self);
 
-  auto buffer = Vector2ToString(*vec2);
+  auto buffer = Vector2ToString(vec2);
 
   return rb_str_new_cstr(buffer.c_str());
 }
 
 extern "C" void Init_Vec2() {
   rb_cVec2 = rb_define_class("Vec2", rb_cObject);
-  rb_define_alloc_func(rb_cVec2, rb_object_alloc<Vector2>);
+  rb_define_alloc_func(rb_cVec2, rb::alloc<Vector2>);
 
   rb_define_method(rb_cVec2, "initialize", rb_vec2_initialize, -1);
   rb_define_method(rb_cVec2, "x", rb_vec2_get_x, 0);

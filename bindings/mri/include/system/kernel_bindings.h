@@ -5,7 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rapidcsv.h"
 #include "rgray/raylib_values.h"
 #include "rgray/system/kernel.h"

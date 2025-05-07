@@ -7,7 +7,7 @@ VALUE rb_cCamera;
 //------------------------------------------------------------------------------------
 // RLAPI void UpdateCamera(Camera *camera, int mode);      // Update camera position for selected
 // mode static auto rb_update_camera(VALUE self, VALUE rb_mode) {
-//   auto *camera = get_camera(self);
+//   auto& camera = rb::get<Camera2D>(self);
 //   auto mode = NUM2INT(rb_mode);
 
 //   UpdateCamera(camera, mode);
@@ -16,7 +16,7 @@ VALUE rb_cCamera;
 // }
 // RLAPI void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float zoom); // Update camera movement/rotation
 // static auto rb_update_camera_pro(VALUE self, VALUE rb_movement, VALUE rb_rotation, VALUE rb_zoom) {
-//   auto *camera = get_camera(self);
+//   auto& camera = rb::get<Camera2D>(self);
 //   auto movement = get_vec3(rb_movement);
 //   auto rotation = get_vec3(rb_rotation);
 //   auto zoom = NUM2FLOAT(rb_zoom);
@@ -34,31 +34,24 @@ VALUE rb_cCamera;
 // RLAPI Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
 // RLAPI Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera);    // Get the screen space position for a 2d camera world space position
 static auto rb_get_world_to_screen_2d(VALUE self, VALUE rb_position) {
-  auto *camera = get_camera(self);
-  auto *position = get_vec2(rb_position);
+  auto& camera = rb::get<Camera2D>(self);
+  auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
 
-  auto result = GetWorldToScreen2D(*position, *camera);
+  auto result = GetWorldToScreen2D(*position, camera);
 
-  return Data_Wrap_Struct(rb_cVec2, NULL, rb_object_free<Vector2>, &result);
+  return rb::alloc_copy<Vector2>(rb_cVec2, result);
 }
 // RLAPI Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera);    // Get the world space position for a 2d camera screen space position
 static auto rb_get_screen_to_world_2d(VALUE self, VALUE rb_position) {
-  auto *camera = get_camera(self);
-  auto *position = get_vec2(rb_position);
+  auto& camera = rb::get<Camera2D>(self);
+  auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
 
-  auto result = GetScreenToWorld2D(*position, *camera);
+  auto result = GetScreenToWorld2D(*position, camera);
 
-  return Data_Wrap_Struct(rb_cVec2, NULL, rb_object_free<Vector2>, &result);
+  return rb::alloc_copy<Vector2>(rb_cVec2, result);
 }
 // RLAPI Matrix GetCameraMatrix(Camera camera);                            // Get camera transform matrix (view matrix)
 // RLAPI Matrix GetCameraMatrix2D(Camera2D camera);                        // Get camera 2d transform matrix
-// static VALUE rb_get_camera_matrix_2d(VALUE self) {
-//   Camera2D *camera = get_camera_2d(self);
-
-//   auto matrix = GetCameraMatrix2D(*camera);
-
-//   return wrap_matrix(matrix);
-// }
 
 // RLAPI Vector3 GetCameraForward(Camera *camera);
 // RLAPI Vector3 GetCameraUp(Camera *camera);
@@ -109,39 +102,39 @@ static auto rb_get_screen_to_world_2d(VALUE self, VALUE rb_position) {
 //     Vector2 offset;         // Camera offset (displacement from target)
 //     Vector2 target;         // Camera target (rotation and zoom origin)
 //     float rotation;         // Camera rotation in degrees
-//     float zoom;             // Camera zoom (scaling), should be 1.0f by default
+//     float zoom;             // Camera zoom (scaling), should be 1.0F by default
 // } Camera2D;
 static auto rb_camera_initialize(VALUE self, VALUE rb_offset, VALUE rb_target, VALUE rb_rotation, VALUE rb_zoom) {
-  auto *camera = get_camera(self);
-  auto *offset = get_vec2(rb_offset);
-  auto *target = get_vec2(rb_target);
-  auto rotation = NUM2DBL(rb_rotation);
-  auto zoom = NUM2DBL(rb_zoom);
+  auto& camera = rb::get<Camera2D>(self);
+  auto* offset = rb::get_safe<Vector2>(rb_offset, rb_cVec2);
+  auto* target = rb::get_safe<Vector2>(rb_target, rb_cVec2);
+  auto rotation = NUM2FLT(rb_rotation);
+  auto zoom = NUM2FLT(rb_zoom);
 
-  camera->offset = *offset;
-  camera->target = *target;
-  camera->rotation = rotation;
-  camera->zoom = zoom;
+  camera.offset = *offset;
+  camera.target = *target;
+  camera.rotation = rotation;
+  camera.zoom = zoom;
 
   return self;
 }
 
-RB_CAMERA_GETTER_VEC2(rb_camera_get_offset, offset)
-RB_CAMERA_GETTER_VEC2(rb_camera_get_target, target)
-RB_CAMERA_GETTER(rb_camera_get_rotation, rotation)
-RB_CAMERA_GETTER(rb_camera_get_zoom, zoom)
-RB_CAMERA_SETTER_VEC2(rb_camera_set_offset, offset)
-RB_CAMERA_SETTER_VEC2(rb_camera_set_target, target)
-RB_CAMERA_SETTER(rb_camera_set_rotation, rotation)
-RB_CAMERA_SETTER(rb_camera_set_zoom, zoom)
+RB_METHOD_CAMERA_GETTER_VEC2(rb_camera_get_offset, offset)
+RB_METHOD_CAMERA_GETTER_VEC2(rb_camera_get_target, target)
+RB_METHOD_CAMERA_GETTER(rb_camera_get_rotation, rotation)
+RB_METHOD_CAMERA_GETTER(rb_camera_get_zoom, zoom)
+RB_METHOD_CAMERA_SETTER_VEC2(rb_camera_set_offset, offset)
+RB_METHOD_CAMERA_SETTER_VEC2(rb_camera_set_target, target)
+RB_METHOD_CAMERA_SETTER(rb_camera_set_rotation, rotation)
+RB_METHOD_CAMERA_SETTER(rb_camera_set_zoom, zoom)
 
 // RLAPI void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
 // RLAPI void EndMode2D(void);                                       // Ends 2D mode with custom camera
 static auto rb_begin_mode_2d(VALUE self) {
-  auto *camera = get_camera(self);
+  auto& camera = rb::get<Camera2D>(self);
 
   rb_need_block();
-  BeginMode2D(*camera);
+  BeginMode2D(camera);
   rb_yield(Qnil);
   EndMode2D();
 

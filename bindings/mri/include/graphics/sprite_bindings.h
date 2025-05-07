@@ -2,17 +2,23 @@
 #define SPRITE_H
 
 #include <stdio.h>
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 extern VALUE rb_cSprite;
 extern "C" void Init_Sprite();
 
-inline Texture2D *get_texture(VALUE obj) {
-  Texture2D *texture;
-  Data_Get_Struct(obj, Texture2D, texture);
+// Creates a full Ruby-managed copy of a Texture2D (heap allocated, freed with GC)
+inline VALUE wrap_texture_copy(const Texture2D& source) {
+  Texture2D* copy = ALLOC(Texture2D);
+  *copy = source;
+  return Data_Wrap_Struct(rb_cSprite, nullptr, nullptr, copy);
+}
 
-  return texture;
+// Wraps a borrowed pointer to Texture2D (no copy, no free — lifetime managed elsewhere)
+inline VALUE wrap_texture_borrowed(Texture2D* tex) {
+  return Data_Wrap_Struct(rb_cSprite, nullptr, nullptr, tex);
 }
 
 template <typename T>
@@ -37,10 +43,10 @@ VALUE rb_texture_alloc(VALUE klass) {
 }
 
 // Macro to define getter methods
-#define RB_TEXTURE_GETTER_INT(name, member) \
+#define RB_METHOD_TEXTURE_GETTER_INT(name, member) \
   static VALUE name(VALUE self) {           \
-    Texture2D *texture = get_texture(self); \
-    return INT2NUM(texture->member);        \
+    auto& texture = rb::get<Texture2D>(self); \
+    return INT2NUM(texture.member);        \
   }
 
 #endif // SPRITE_H

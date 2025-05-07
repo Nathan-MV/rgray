@@ -1,7 +1,8 @@
 #ifndef VEC4_H
 #define VEC4_H
 
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 extern VALUE rb_cVec4;

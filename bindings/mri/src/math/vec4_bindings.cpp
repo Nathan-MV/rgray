@@ -4,10 +4,10 @@ VALUE rb_cVec4;
 
 // RLAPI Vector4 ColorNormalize(Color color);                                  // Get Color normalized as float [0..1]
 static auto rb_color_from_normalized(VALUE self) {
-  auto *vec4 = get_vec4(self);
+  auto* vec4 = get_vec4(self);
   auto result = ColorFromNormalized(*vec4);
 
-  return Data_Wrap_Struct(rb_cColor, NULL, rb_object_free<Color>, &result);
+  return Data_Wrap_Struct(rb_cColor, nullptr, rb_object_free<Color>, &result);
 }
 
 extern "C" void Init_Vec4() {

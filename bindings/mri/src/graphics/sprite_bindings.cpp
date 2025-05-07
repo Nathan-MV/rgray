@@ -7,25 +7,25 @@ VALUE rb_cSprite;
 // RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
 // RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
 static auto rb_texture_initialize(int argc, VALUE *argv, VALUE self) {
-  auto *texture = get_texture(self);
+  auto& texture = rb::get<Texture2D>(self);
 
   if (argc == 1) {
-    if (rb_obj_is_kind_of(argv[0], rb_cString)) {
-      const auto *filename = StringValueCStr(argv[0]);
-      *texture = LoadTexture(filename);
-    } else if (rb_obj_is_kind_of(argv[0], rb_cBitmap)) {
-      auto *img = get_image(argv[0]);
-      *texture = LoadTextureFromImage(*img);
+    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cString))) {
+      const auto* filename = StringValueCStr(argv[0]);
+      texture = LoadTexture(filename);
+    } else if (RTEST(rb_obj_is_kind_of(argv[0], rb_cBitmap))) {
+      auto* img = rb::get_safe<Image>(argv[0], rb_cBitmap);
+      texture = LoadTextureFromImage(*img);
     } else {
       rb_raise(rb_eTypeError, "expected a String or Image");
     }
   } else if (argc == 2) {
-    if (rb_obj_is_kind_of(argv[0], rb_cBitmap) &&
-        rb_obj_is_kind_of(argv[1], rb_cInteger)) {
-      auto *img = get_image(argv[0]);
-      int layout = NUM2INT(argv[1]);
+    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cBitmap))
+        && RTEST(rb_obj_is_kind_of(argv[1], rb_cInteger))) {
+      auto* img = rb::get_safe<Image>(argv[0], rb_cBitmap);
+      const auto layout = NUM2INT(argv[1]);
 
-      *texture = LoadTextureCubemap(*img, layout);
+      texture = LoadTextureCubemap(*img, layout);
     } else {
       rb_raise(rb_eTypeError, "expected image and layout");
     }
@@ -36,115 +36,115 @@ static auto rb_texture_initialize(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
-RB_TEXTURE_GETTER_INT(rb_texture_width, width)
-RB_TEXTURE_GETTER_INT(rb_texture_height, height)
-RB_TEXTURE_GETTER_INT(rb_texture_mipmaps, mipmaps)
-RB_TEXTURE_GETTER_INT(rb_texture_format, format)
+RB_METHOD_TEXTURE_GETTER_INT(rb_texture_width, width)
+RB_METHOD_TEXTURE_GETTER_INT(rb_texture_height, height)
+RB_METHOD_TEXTURE_GETTER_INT(rb_texture_mipmaps, mipmaps)
+RB_METHOD_TEXTURE_GETTER_INT(rb_texture_format, format)
 
 // Texture loading functions
 // NOTE: These functions require GPU access
 // RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
 static auto rb_load_texture_from_image(VALUE self, VALUE rb_image) {
-    auto *texture = get_texture(self);
-    auto *img = get_image(rb_image);
+    auto& texture = rb::get<Texture2D>(self);
+    auto* img = rb::get_safe<Image>(rb_image, rb_cBitmap);
 
-    *texture = LoadTextureFromImage(*img);
+    texture = LoadTextureFromImage(*img);
 
     return self;
 }
 // RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
 static auto rb_load_texture_cubemap(VALUE self, VALUE rb_image, VALUE rb_layout) {
-  auto *texture = get_texture(self);
-  auto *img = get_image(rb_image);
-  int layout = NUM2INT(rb_layout);
+  auto& texture = rb::get<Texture2D>(self);
+  auto* img = rb::get_safe<Image>(rb_image, rb_cBitmap);
+  const int layout = NUM2INT(rb_layout);
 
-  *texture = LoadTextureCubemap(*img, layout);
+  texture = LoadTextureCubemap(*img, layout);
 
   return self;
 }
 
 // RLAPI bool IsTextureValid(Texture2D texture);                                                            // Check if a texture is ready
 static auto rb_is_texture_ready(VALUE self) {
-  auto *texture = get_texture(self);
+  auto& texture = rb::get<Texture2D>(self);
 
-  return IsTextureValid(*texture)? Qtrue : Qfalse;
+  return IsTextureValid(texture)? Qtrue : Qfalse;
 }
 // Unload texture from GPU memory (VRAM)
 static auto rb_unload_texture(VALUE self) {
-  auto *texture = get_texture(self);
+  auto& texture = rb::get<Texture2D>(self);
 
-  UnloadTexture(*texture);
-  delete texture;
+  UnloadTexture(texture);
+  rb::raw_dispose<Texture2D>(self);
 
   return self;
 }
 // RLAPI void UpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
 static auto rb_update_texture(VALUE self, VALUE rb_pixels) {
-  auto *texture = get_texture(self);
-  const auto *pixels = RSTRING_PTR(rb_pixels);
+  auto& texture = rb::get<Texture2D>(self);
+  const auto* pixels = RSTRING_PTR(rb_pixels);
 
-  UpdateTexture(*texture, pixels);
+  UpdateTexture(texture, pixels);
 
   return self;
 }
 // RLAPI void UpdateTextureRec(Texture2D texture, RayRectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
 static auto rb_update_texture_rec(VALUE self, VALUE rb_rec, VALUE rb_pixels) {
-  auto *texture = get_texture(self);
-  auto *rect = get_rect(rb_rec);
-  const auto *pixels = RSTRING_PTR(rb_pixels);
+  auto& texture = rb::get<Texture2D>(self);
+  auto* rect = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  const auto* pixels = RSTRING_PTR(rb_pixels);
 
-  UpdateTextureRec(*texture, *rect, pixels);
+  UpdateTextureRec(texture, *rect, pixels);
 
   return self;
 }
 
 // Texture configuration functions
-// RLAPI void GenTextureMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture
+// RLAPI void GenTextureMipmaps(Texture2D texture);                                                        // Generate GPU mipmaps for a texture
 static auto rb_gen_texture_mipmaps(VALUE self) {
-  auto texture = get_texture(self);
+  auto& texture = rb::get<Texture2D>(self);
 
-  GenTextureMipmaps(texture);
+  GenTextureMipmaps(&texture);
 
   return self;
 }
 // RLAPI void SetTextureFilter(Texture2D texture, int filter);                                              // Set texture scaling filter mode
 static auto rb_set_texture_filter(VALUE self, VALUE rb_filter) {
-  auto *texture = get_texture(self);
-  int filter = NUM2INT(rb_filter);
+  auto& texture = rb::get<Texture2D>(self);
+  const auto filter = NUM2INT(rb_filter);
 
-  SetTextureFilter(*texture, filter);
+  SetTextureFilter(texture, filter);
 
   return Qnil;
 }
 // RLAPI void SetTextureWrap(Texture2D texture, int wrap);                                                  // Set texture wrapping mode
 static auto rb_set_texture_wrap(VALUE self, VALUE rb_wrap) {
-  auto *texture = get_texture(self);
-  int wrap = NUM2INT(rb_wrap);
+  auto& texture = rb::get<Texture2D>(self);
+  const auto wrap = NUM2INT(rb_wrap);
 
-  SetTextureWrap(*texture, wrap);
+  SetTextureWrap(texture, wrap);
 
   return Qnil;
 }
 
 // Texture drawing functions
 // RLAPI void DrawTexture(Texture2D texture, int posX, int posY, Color tint);                               // Draw a Texture2D
-static auto rb_draw_texture(VALUE self, VALUE rb_pos_y, VALUE rb_pos_x, VALUE rb_tint) {
-  auto *texture = get_texture(self);
-  int posY = NUM2INT(rb_pos_y);
-  int posX = NUM2INT(rb_pos_x);
-  auto *tint = get_color(rb_tint);
+static auto rb_draw_texture(VALUE self, VALUE rb_pos_x, VALUE rb_pos_y, VALUE rb_tint) {
+  auto& texture = rb::get<Texture2D>(self);
+  const auto posX = NUM2INT(rb_pos_x);
+  const auto posY = NUM2INT(rb_pos_y);
+  auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
-  DrawTexture(*texture, posY, posX, *tint);
+  DrawTexture(texture, posX, posY, *tint);
 
   return self;
 }
 // RLAPI void DrawTextureV(Texture2D texture, Vector2 position, Color tint);                                // Draw a Texture2D with position defined as Vector2
 static auto rb_draw_texture_v(VALUE self, VALUE rb_position, VALUE rb_tint) {
-  auto *texture = get_texture(self);
-  auto *position = get_vec2(rb_position);
-  auto *tint = get_color(rb_tint);
+  auto& texture = rb::get<Texture2D>(self);
+  auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
+  auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
-  DrawTextureV(*texture, *position, *tint);
+  DrawTextureV(texture, *position, *tint);
 
   return self;
 }
@@ -154,13 +154,13 @@ static auto rb_draw_texture_ex(int argc, VALUE *argv, VALUE self) {
 
   rb_scan_args(argc, argv, "03", &rb_position, &rb_rotation, &rb_tint);
 
-  auto *texture = get_texture(self);
-  auto position = !NIL_P(rb_position) ? *get_vec2(rb_position) : (Vector2){0, 0};
-  auto rotation = NIL_P(rb_rotation) ? 0 : NUM2DBL(rb_rotation);
-  auto scale = 1.0f;
-  auto tint = !NIL_P(rb_tint) ? *get_color(rb_tint) : (Color){255, 255, 255, 255};
+  auto& texture = rb::get<Texture2D>(self);
+  auto position = !NIL_P(rb_position) ? *rb::get_safe<Vector2>(rb_position, rb_cVec2) : Vector2{0, 0};
+  auto rotation = NIL_P(rb_rotation) ? 0.0 : NUM2FLT(rb_rotation);
+  auto scale = 1.0F;
+  auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
 
-  DrawTextureEx(*texture, position, rotation, scale, tint);
+  DrawTextureEx(texture, position, rotation, scale, tint);
 
   return self;
 }
@@ -170,12 +170,12 @@ static auto rb_draw_texture_rec(int argc, VALUE *argv, VALUE self) {
 
   rb_scan_args(argc, argv, "21", &rb_source, &rb_position, &rb_tint);
 
-  auto *texture = get_texture(self);
-  auto *source = get_rect(rb_source);
-  auto *position = get_vec2(rb_position);
-  auto tint = !NIL_P(rb_tint) ? *get_color(rb_tint) : (Color){255, 255, 255, 255};
+  auto& texture = rb::get<Texture2D>(self);
+  auto* source = rb::get_safe<RayRectangle>(rb_source, rb_cRect);
+  auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
+  auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
 
-  DrawTextureRec(*texture, *source, *position, tint);
+  DrawTextureRec(texture, *source, *position, tint);
 
   return self;
 }
@@ -185,16 +185,16 @@ static auto rb_draw_texture_pro(int argc, VALUE *argv, VALUE self) {
 
   rb_scan_args(argc, argv, "14", &rb_source, &rb_dest, &rb_origin, &rb_rotation, &rb_tint);
 
-  auto *texture = get_texture(self);
-  auto source = *get_rect(rb_source);
+  auto& texture = rb::get<Texture2D>(self);
+  auto* source = rb::get_safe<RayRectangle>(rb_source, rb_cRect);
   auto dst = !NIL_P(rb_dest)
-                 ? *get_rect(rb_dest)
-                 : (RayRectangle){source.x, source.y, fabsf(source.width), fabsf(source.height)};
-  auto origin = !NIL_P(rb_origin) ? *get_vec2(rb_origin) : (Vector2){0.0f, 0.0f};
-  auto rotation = NIL_P(rb_rotation) ? 0 : NUM2DBL(rb_rotation);
-  auto tint = !NIL_P(rb_tint) ? *get_color(rb_tint) : (Color){255, 255, 255, 255};
+                 ? *rb::get_safe<RayRectangle>(rb_dest, rb_cRect)
+                 : (RayRectangle){source->x, source->y, fabsf(source->width), fabsf(source->height)};
+  auto origin = !NIL_P(rb_origin) ? *rb::get_safe<Vector2>(rb_origin, rb_cVec2) : Vector2{0.0F, 0.0F};
+  auto rotation = NIL_P(rb_rotation) ? 0.0 : NUM2FLT(rb_rotation);
+  auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
 
-  DrawTexturePro(*texture, source, dst, origin, rotation, tint);
+  DrawTexturePro(texture, *source, dst, origin, rotation, tint);
 
   return self;
 }
@@ -250,21 +250,21 @@ static auto rb_draw_texture_pro(int argc, VALUE *argv, VALUE self) {
 // } PixelFormat;
 
 static auto rb_set_texture_scale(VALUE self, VALUE value) {
-  auto *texture = get_texture(self);
-  auto val = NUM2DBL(value);
+  auto& texture = rb::get<Texture2D>(self);
+  auto val = NUM2FLT(value);
 
-  texture->width *= val;
-  texture->height *= val;
+  texture.width = static_cast<int>(texture.width * val);
+  texture.height = static_cast<int>(texture.height * val);
 
-  return self;
+  return Qnil;
 }
 
 // Load texture from file into GPU memory (VRAM)
 static auto rb_load_texture(VALUE self, VALUE rb_string) {
-  auto *texture = get_texture(self);
-  const auto *filename = StringValueCStr(rb_string);
+  auto& texture = rb::get<Texture2D>(self);
+  const auto* filename = StringValueCStr(rb_string);
 
-  *texture = LoadTexture(filename);
+  texture = LoadTexture(filename);
 
   return self;
 }

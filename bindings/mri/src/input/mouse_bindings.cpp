@@ -14,9 +14,9 @@ RB_METHOD_INT(rb_get_mouse_x, GetMouseX)
 // RLAPI int GetMouseY(void);                                    // Get mouse position Y
 RB_METHOD_INT(rb_get_mouse_y, GetMouseY)
 // RLAPI Vector2 GetMousePosition(void);                         // Get mouse position XY
-RB_METHOD_VEC2(rb_get_mouse_position, GetMousePosition)
+RB_METHOD_TO_VEC2(rb_get_mouse_position, GetMousePosition)
 // RLAPI Vector2 GetMouseDelta(void);                            // Get mouse delta between frames
-RB_METHOD_VEC2(rb_get_mouse_delta, GetMouseDelta)
+RB_METHOD_TO_VEC2(rb_get_mouse_delta, GetMouseDelta)
 // RLAPI void SetMousePosition(int x, int y);                    // Set mouse position XY
 RB_METHOD_ARG_INT_INT(rb_set_mouse_position, SetMousePosition, self)
 // RLAPI void SetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
@@ -26,7 +26,7 @@ RB_METHOD_ARG_FLOAT_FLOAT(rb_set_mouse_scale, SetMouseScale, self)
 // RLAPI float GetMouseWheelMove(void);                          // Get mouse wheel movement for X or Y, whichever is larger
 RB_METHOD_FLOAT(rb_get_mouse_wheel_move, GetMouseWheelMove)
 // RLAPI Vector2 GetMouseWheelMoveV(void);                       // Get mouse wheel movement for both X and Y
-RB_METHOD_VEC2(rb_get_mouse_wheel_move_v, GetMouseWheelMoveV)
+RB_METHOD_TO_VEC2(rb_get_mouse_wheel_move_v, GetMouseWheelMoveV)
 // RLAPI void SetMouseCursor(int cursor);                        // Set mouse cursor
 RB_METHOD_ARG_INT(rb_set_mouse_cursor, SetMouseCursor, Qnil)
 

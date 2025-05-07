@@ -36,6 +36,7 @@ set(SRC_FILES
   src/math/vec2_bindings.cpp
   src/math/vec3_bindings.cpp
   src/math/vec4_bindings.cpp
+  src/math/math_bindings.cpp
   src/physics/camera_bindings.cpp
   src/system/automation_event_bindings.cpp
   src/system/files_bindings.cpp
@@ -49,14 +50,29 @@ set(SRC_FILES
 
 find_package(Ruby 3.0 REQUIRED)
 
-# ---- Add Libraries ----
-add_library(${PROJECT_NAME}_mri_static STATIC ${SRC_FILES})
-add_library(${PROJECT_NAME}_mri SHARED ${SRC_FILES})
+# ---- Add Source Libraries ----
 
-# ---- Setup common library properties ----
+add_library(${PROJECT_NAME}_mri_static STATIC ${SRC_FILES})
+add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
+
+# ---- Common Compile Options ----
+
+set(COMMON_COMPILE_OPTIONS
+  -Wno-deprecated-declarations
+)
+
+# ---- Setup Library Function ----
 
 function(setup_library target)
+  target_link_libraries(${target}
+    myproject_options
+    #myproject_warnings
+    ${PROJECT_NAME}_static
+    ${RUBY_LIBRARY}
+  )
+
   target_include_directories(${target}
+    ${WARNING_GUARD}
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
@@ -70,31 +86,66 @@ function(setup_library target)
       ${RUBY_INCLUDE_PATH}
   )
 
-  target_link_libraries(${target} ${PROJECT_NAME}_static ${RUBY_LIBRARY})
+  target_compile_features(${target} PUBLIC cxx_std_23)
 
-  # Suppress deprecation warnings
-  if(MSVC)
-    target_compile_options(${target} PRIVATE /wd4996)  # MSVC-specific: ignore deprecated warnings
-  else()
-    target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
+  target_compile_options(${target}
+    PRIVATE ${COMMON_COMPILE_OPTIONS}
+  )
+
+  set_target_properties(
+    ${target}
+    PROPERTIES VERSION ${PROJECT_VERSION}
+              CXX_VISIBILITY_PRESET hidden
+              #VISIBILITY_INLINES_HIDDEN YES
+  )
+
+  #generate_export_header(${target} EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/myproject/sample_library_export.hpp)
+
+  if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${target} PUBLIC SAMPLE_LIBRARY_STATIC_DEFINE)
   endif()
 
-  # Set the output extension to `.so` on Windows
-  if(WIN32)
-    set_target_properties(${target} PROPERTIES SUFFIX ".so")
+  # Apply shared lib properties if this is the shared lib target
+  if("${target}" STREQUAL "${PROJECT_NAME}")
+    set_target_properties(${target}
+      PROPERTIES PREFIX "" SUFFIX ".so"
+    )
   endif()
 endfunction()
 
-# ---- Setup static (for executables) and shared (for CRuby extension) libraries ----
+# ---- Apply Setup to Targets ----
 
 setup_library(${PROJECT_NAME}_mri_static)
-setup_library(${PROJECT_NAME}_mri)
+setup_library(${PROJECT_NAME})
 
 # Copy Ruby library to output directory
 if(Ruby_FOUND)
-  add_custom_command(TARGET ${PROJECT_NAME}_mri POST_BUILD
+  add_custom_command(TARGET ${PROJECT_NAME}_mri_static POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       ${RUBY_LIBRARY}
       ${CMAKE_BINARY_DIR}/out
   )
 endif()
+
+# ---- YARD Documentation Generator ----
+
+set(DOC_OUTPUTS "")
+foreach(src_file IN LISTS SRC_FILES)
+  get_filename_component(src_name ${src_file} NAME_WE)
+  string(REPLACE "_bindings" "" cleaned_name ${src_name})
+  set(out_file "${CMAKE_SOURCE_DIR}/doc/${cleaned_name}.rb")
+  list(APPEND DOC_OUTPUTS ${out_file})
+
+  add_custom_command(
+    OUTPUT ${out_file}
+    COMMAND ${RUBY_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/generate_yard_docs.rb "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    DEPENDS ${src_file} ${CMAKE_SOURCE_DIR}/tools/generate_yard_docs.rb
+    COMMENT "Generating YARD doc for ${src_file}"
+  )
+endforeach()
+
+add_custom_target(generate_docs ALL
+  DEPENDS ${DOC_OUTPUTS}
+)
+

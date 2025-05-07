@@ -1,125 +1,149 @@
 #include <graphics/shader_bindings.h>
+#include <string.h>
 
 VALUE rb_cShader;
+
+// Helper to check if a string ends with a given suffix
+bool ends_with(const char* str, const char* suffix) {
+  size_t str_len = strlen(str);
+  size_t suffix_len = strlen(suffix);
+  return (str_len >= suffix_len) && (strcmp(str + str_len - suffix_len, suffix) == 0);
+}
+
+// Check if a string looks like a shader filename (by extension)
+bool looks_like_shader_file(const char* str) {
+  return ends_with(str, ".vs") || ends_with(str, ".fs") ||
+         ends_with(str, ".vert") || ends_with(str, ".frag") ||
+         ends_with(str, ".glsl");
+}
 
 // // Shader management functions
 // // NOTE: Shader functionality is not available on OpenGL 1.1
 // RLAPI Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
+// RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
 static auto rb_shader_initialize(int argc, VALUE *argv, VALUE self) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
 
   if (argc == 2) {
-    const char *vsFileName = NIL_P(argv[0]) ? nullptr : StringValueCStr(argv[0]);
-    const char *fsFileName = NIL_P(argv[1]) ? nullptr : StringValueCStr(argv[1]);
-    *shader = LoadShader(vsFileName, fsFileName);
+    const char *vs = nullptr;
+    const char *fs = nullptr;
+
+    if (!NIL_P(argv[0])) vs = StringValueCStr(argv[0]);
+    if (!NIL_P(argv[1])) fs = StringValueCStr(argv[1]);
+
+    if ((vs == nullptr || looks_like_shader_file(vs)) && fs != nullptr && looks_like_shader_file(fs)) {
+      // Load from file paths
+      shader = LoadShader(vs, fs);
+    } else {
+      // Load from memory
+      shader = LoadShaderFromMemory(vs, fs);
+    }
   } else {
-    rb_raise(rb_eArgError, "wrong number of arguments (given %d, expected 2 arguments)", argc);
+    rb_raise(rb_eArgError, "wrong number of arguments (given %d, expected 2)", argc);
   }
 
   return self;
 }
-// RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
 // RLAPI bool IsShaderValid(Shader shader);                                   // Check if a shader is ready
 static auto rb_is_shader_ready(VALUE self) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
 
-  return IsShaderValid(*shader)? Qtrue : Qfalse;
+  return IsShaderValid(shader) ? Qtrue : Qfalse;
 }
 // RLAPI int GetShaderLocation(Shader shader, const char *uniformName);       // Get shader uniform location
 static auto rb_get_shader_location(VALUE self, VALUE rb_uniform_name) {
-  auto *shader = get_shader(self);
-  const char *uniformName = StringValueCStr(rb_uniform_name);
+  auto& shader = rb::get<Shader>(self);
+  const auto* uniformName = StringValueCStr(rb_uniform_name);
 
-  int location = GetShaderLocation(*shader, uniformName);
+  auto location = GetShaderLocation(shader, uniformName);
 
   return INT2NUM(location);
 }
 // RLAPI int GetShaderLocationAttrib(Shader shader, const char *attribName);  // Get shader attribute location
 static auto rb_get_shader_location_attrib(VALUE self, VALUE rb_attrib_name) {
-  auto *shader = get_shader(self);
-  const char *attribName = StringValueCStr(rb_attrib_name);
+  auto& shader = rb::get<Shader>(self);
+  const auto* attribName = StringValueCStr(rb_attrib_name);
 
-  int location = GetShaderLocationAttrib(*shader, attribName);
+  auto location = GetShaderLocationAttrib(shader, attribName);
 
   return INT2NUM(location);
 }
 // RLAPI void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
 static auto rb_set_shader_value(VALUE self, VALUE rb_loc_index, VALUE rb_value, VALUE rb_uniform_type) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
   auto locIndex = NUM2INT(rb_loc_index);
-  float value = NUM2DBL(rb_value);
+  auto value = NUM2FLT(rb_value);
   auto uniformType = NUM2INT(rb_uniform_type);
 
-  SetShaderValue(*shader, locIndex, &value, uniformType);
+  SetShaderValue(shader, locIndex, &value, uniformType);
 
   return self;
 }
 // RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
 static auto rb_set_shader_value_v(VALUE self, VALUE rb_loc_index, VALUE rb_value, VALUE rb_uniform_type, VALUE rb_count) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
   auto locIndex = NUM2INT(rb_loc_index);
-  float value = NUM2DBL(rb_value);
+  auto value = NUM2FLT(rb_value);
   auto uniformType = NUM2INT(rb_uniform_type);
   auto count = NUM2INT(rb_count);
 
-  SetShaderValueV(*shader, locIndex, &value, uniformType, count);
+  SetShaderValueV(shader, locIndex, &value, uniformType, count);
 
   return self;
 }
 // RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
 // RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
 static auto rb_set_shader_value_texture(VALUE self, VALUE rb_loc_index, VALUE rb_texture) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
   auto locIndex = NUM2INT(rb_loc_index);
-  auto *texture = get_texture(rb_texture);
+  auto* texture = rb::get_safe<Texture2D>(rb_texture, rb_cSprite);
 
-  SetShaderValueTexture(*shader, locIndex, *texture);
+  SetShaderValueTexture(shader, locIndex, *texture);
 
   return self;
 }
 // RLAPI void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
 static auto rb_unload_shader(VALUE self) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
 
-  UnloadShader(*shader);
+  UnloadShader(shader);
+  rb::raw_dispose<Shader>(self);
 
   return self;
 }
 
 static auto rb_set_shader(VALUE self, VALUE rb_uniform_name, VALUE rb_value,
                           VALUE rb_uniform_type) {
-  auto *shader = get_shader(self);
-  const auto *uniformName = StringValueCStr(rb_uniform_name);
-  auto location = GetShaderLocation(*shader, uniformName);
+  auto& shader = rb::get<Shader>(self);
+  const auto* uniformName = StringValueCStr(rb_uniform_name);
+  auto location = GetShaderLocation(shader, uniformName);
 
-  // Allocate and populate values
-  float *values = nullptr;
-  long value_size = (TYPE(rb_value) == T_ARRAY) ? RARRAY_LEN(rb_value) : 1;
-  values = (float *)malloc(sizeof(float) * value_size);
+  std::vector<float> values;
 
-  if (TYPE(rb_value) == T_ARRAY) {
+  if (RB_TYPE_P(rb_value, T_ARRAY)) {
+    long value_size = RARRAY_LEN(rb_value);
+    values.reserve(value_size);
     for (long i = 0; i < value_size; ++i) {
-      values[i] = NUM2DBL(rb_ary_entry(rb_value, i));
+      values.push_back(NUM2FLT(rb_ary_entry(rb_value, i)));
     }
-  } else if (TYPE(rb_value) == T_FLOAT || TYPE(rb_value) == T_FIXNUM) {
-    values[0] = NUM2DBL(rb_value);
+  } else if (RB_TYPE_P(rb_value, T_FLOAT) || RB_TYPE_P(rb_value, T_FIXNUM)) {
+    values.push_back(NUM2FLT(rb_value));
   } else {
-    free(values);  // Prevent memory leak before raising an exception
     rb_raise(rb_eTypeError, "Expected value to be an Array or a Float");
   }
 
-  SetShaderValue(*shader, location, values, NUM2INT(rb_uniform_type));
-  free(values);  // Clean up allocated memory
+  SetShaderValue(shader, location, values.data(), NUM2INT(rb_uniform_type));
+
   return self;
 }
 
 // RLAPI void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
 // RLAPI void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
 static auto rb_begin_shader_mode(VALUE self) {
-  auto *shader = get_shader(self);
+  auto& shader = rb::get<Shader>(self);
 
   rb_need_block();
-  BeginShaderMode(*shader);
+  BeginShaderMode(shader);
   rb_yield(Qnil);
   EndShaderMode();
 
@@ -128,14 +152,17 @@ static auto rb_begin_shader_mode(VALUE self) {
 
 extern "C" void Init_Shader() {
   rb_cShader = rb_define_class("Shader", rb_cObject);
-  rb_define_alloc_func(rb_cShader, rb_shader_alloc<Shader>);
+  rb_define_alloc_func(rb_cShader, alloc_shader<Shader>);
 
   rb_define_method(rb_cShader, "initialize", rb_shader_initialize, -1);
+  rb_define_method(rb_cShader, "load", rb_shader_initialize, -1); // initialize alias
   rb_define_method(rb_cShader, "ready?", rb_is_shader_ready, 0);
   rb_define_method(rb_cShader, "location", rb_get_shader_location, 1);
   rb_define_method(rb_cShader, "location_attrib", rb_get_shader_location_attrib, 1);
   rb_define_method(rb_cShader, "set_value", rb_set_shader_value, 3);
+  rb_define_method(rb_cShader, "set_uniform", rb_set_shader_value, 3); // set_value alias
   rb_define_method(rb_cShader, "set_value_v", rb_set_shader_value_v, 4);
+  rb_define_method(rb_cShader, "set_uniform_v", rb_set_shader_value_v, 4); // set_value_v alias
   rb_define_method(rb_cShader, "set_texture", rb_set_shader_value_texture, 2);
   rb_define_method(rb_cShader, "unload", rb_unload_shader, 0);
   rb_define_method(rb_cShader, "dispose", rb_unload_shader, 0);  // unload alias

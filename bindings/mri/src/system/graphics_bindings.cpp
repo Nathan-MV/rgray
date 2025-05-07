@@ -83,9 +83,9 @@ RB_METHOD_INT_ARG(rb_get_monitor_physical_height, GetMonitorPhysicalHeight)
 // RLAPI int GetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
 RB_METHOD_INT_ARG(rb_get_monitor_refresh_rate, GetMonitorRefreshRate)
 // RLAPI Vector2 GetWindowPosition(void);                            // Get window position XY on monitor
-RB_METHOD_VEC2(rb_get_window_position, GetWindowPosition)
+RB_METHOD_TO_VEC2(rb_get_window_position, GetWindowPosition)
 // RLAPI Vector2 GetWindowScaleDPI(void);                            // Get window scale DPI factor
-RB_METHOD_VEC2(rb_get_scale_dpi, GetWindowScaleDPI)
+RB_METHOD_TO_VEC2(rb_get_scale_dpi, GetWindowScaleDPI)
 // RLAPI const char *GetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the specified monitor
 RB_METHOD_CONST_STR_ARG_INT(rb_get_monitor_name, GetMonitorName)
 // RLAPI void EnableEventWaiting(void);                              // Enable waiting for events on EndDrawing(), no automatic event polling
@@ -129,6 +129,7 @@ RB_METHOD_ARG_INT_INT(rb_draw_fps, DrawFPS, self)
 // everything + SwapScreenBuffer() + manage frame timing + PollInputEvents() To
 // avoid that behaviour and control frame processes manually, enable in
 // config.h: SUPPORT_CUSTOM_FRAME_CONTROL
+
 // RLAPI void SwapScreenBuffer(void); // Swap back buffer with front buffer (screen drawing)
 RB_METHOD(rb_swap_screen_buffer, SwapScreenBuffer)
 // RLAPI void PollInputEvents(void); // Register all input events
@@ -137,6 +138,7 @@ RB_METHOD(rb_poll_input_events, PollInputEvents)
 RB_METHOD_ARG_FLOAT(rb_wait_time, WaitTime, self)
 
 // Misc. functions
+
 // RLAPI void TakeScreenshot(const char *fileName); // Takes a screenshot of current screen
 RB_METHOD_ARG_STR(rb_take_screenshot, TakeScreenshot, self)
 //                                       // (filename extension defines format)
@@ -146,10 +148,10 @@ RB_METHOD_ARG_UINT(rb_set_config_flags, SetConfigFlags, Qnil)
 RB_METHOD_ARG_STR(rb_open_url, OpenURL, self)
 
 // RLAPI void ClearBackground(Color color);                          // Set background color (framebuffer clear color)
-static auto rb_clear_background(VALUE self, VALUE color) {
-  auto *col = get_color(color);
+static auto rb_clear_background(VALUE self, VALUE rb_color) {
+  auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  ClearBackground(*col);
+  ClearBackground(*color);
 
   return Qnil;
 }
@@ -167,10 +169,9 @@ static auto rb_begin_drawing(VALUE self) {
 extern "C" void Init_Graphics() {
   VALUE rb_mGraphics = rb_define_module("Graphics");
 
-  rb_define_module_function(rb_mGraphics, "init", rb_init_window, 3);
+  rb_define_module_function(rb_mGraphics, "init", rb_init_window, 3);  // RLAPI void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
   rb_define_module_function(rb_mGraphics, "close", rb_close_window, 0);
-  rb_define_module_function(rb_mGraphics, "should_close?", rb_window_should_close,
-                            0);
+  rb_define_module_function(rb_mGraphics, "should_close?", rb_window_should_close, 0);
   rb_define_module_function(rb_mGraphics, "ready?", rb_window_ready, 0);
   rb_define_module_function(rb_mGraphics, "fullscreen?", rb_window_fullscreen, 0);
   rb_define_module_function(rb_mGraphics, "hidden?", rb_window_hidden, 0);
@@ -180,11 +181,9 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "resized?", rb_window_resized, 0);
   rb_define_module_function(rb_mGraphics, "state?", rb_is_window_state, 1);
   rb_define_module_function(rb_mGraphics, "state=", rb_set_window_state, 1);
-  rb_define_module_function(rb_mGraphics, "clear_state", rb_clear_window_state,
-                            1);
+  rb_define_module_function(rb_mGraphics, "clear_state", rb_clear_window_state, 1);
   rb_define_module_function(rb_mGraphics, "fullscreen", rb_toggle_fullscreen, 0);
-  rb_define_module_function(rb_mGraphics, "borderless_windowed",
-                            rb_toggle_borderless_windowed, 0);
+  rb_define_module_function(rb_mGraphics, "borderless_windowed", rb_toggle_borderless_windowed, 0);
   rb_define_module_function(rb_mGraphics, "maximize", rb_maximize_window, 0);
   rb_define_module_function(rb_mGraphics, "minimize", rb_minimize_window, 0);
   rb_define_module_function(rb_mGraphics, "restore", rb_restore_window, 0);
@@ -201,29 +200,18 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "focused", rb_set_window_focused, 0);
   rb_define_module_function(rb_mGraphics, "handle", rb_get_window_handle, 0);
   rb_define_module_function(rb_mGraphics, "screen_width", rb_get_screen_width, 0);
-  rb_define_module_function(rb_mGraphics, "screen_height", rb_get_screen_height,
-                            0);
+  rb_define_module_function(rb_mGraphics, "screen_height", rb_get_screen_height, 0);
   rb_define_module_function(rb_mGraphics, "render_width", rb_get_render_width, 0);
-  rb_define_module_function(rb_mGraphics, "render_height", rb_get_render_height,
-                            0);
-  rb_define_module_function(rb_mGraphics, "monitor_count", rb_get_monitor_count,
-                            0);
-  rb_define_module_function(rb_mGraphics, "current_monitor",
-                            rb_get_current_monitor, 0);
-  rb_define_module_function(rb_mGraphics, "monitor_position",
-                            rb_get_monitor_position, 1);
-  rb_define_module_function(rb_mGraphics, "monitor_width", rb_get_monitor_width,
-                            1);
-  rb_define_module_function(rb_mGraphics, "monitor_height", rb_get_monitor_height,
-                            1);
-  rb_define_module_function(rb_mGraphics, "monitor_physical_width",
-                            rb_get_monitor_physical_width, 1);
-  rb_define_module_function(rb_mGraphics, "monitor_physical_height",
-                            rb_get_monitor_physical_height, 1);
-  rb_define_module_function(rb_mGraphics, "refresh_rate",
-                            rb_get_monitor_refresh_rate, 1);
-  rb_define_module_function(rb_mGraphics, "position",
-                            rb_get_window_position, 0);
+  rb_define_module_function(rb_mGraphics, "render_height", rb_get_render_height, 0);
+  rb_define_module_function(rb_mGraphics, "monitor_count", rb_get_monitor_count, 0);
+  rb_define_module_function(rb_mGraphics, "current_monitor", rb_get_current_monitor, 0);
+  rb_define_module_function(rb_mGraphics, "monitor_position", rb_get_monitor_position, 1);
+  rb_define_module_function(rb_mGraphics, "monitor_width", rb_get_monitor_width, 1);
+  rb_define_module_function(rb_mGraphics, "monitor_height", rb_get_monitor_height, 1);
+  rb_define_module_function(rb_mGraphics, "monitor_physical_width", rb_get_monitor_physical_width, 1);
+  rb_define_module_function(rb_mGraphics, "monitor_physical_height", rb_get_monitor_physical_height, 1);
+  rb_define_module_function(rb_mGraphics, "refresh_rate", rb_get_monitor_refresh_rate, 1);
+  rb_define_module_function(rb_mGraphics, "position", rb_get_window_position, 0);
   rb_define_module_function(rb_mGraphics, "scale_dpi", rb_get_scale_dpi, 0);
   rb_define_module_function(rb_mGraphics, "monitor_name", rb_get_monitor_name, 1);
   rb_define_module_function(rb_mGraphics, "enable_event_waiting", rb_enable_event_waiting, 0);
@@ -237,8 +225,7 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "cursor_hidden?", rb_cursor_hidden, 0);
   rb_define_module_function(rb_mGraphics, "enable_cursor", rb_enable_cursor, 0);
   rb_define_module_function(rb_mGraphics, "disable_cursor", rb_disable_cursor, 0);
-  rb_define_module_function(rb_mGraphics, "cursor_on_screen?",
-                            rb_cursor_on_screen, 0);
+  rb_define_module_function(rb_mGraphics, "cursor_on_screen?", rb_cursor_on_screen, 0);
 
   rb_define_module_function(rb_mGraphics, "target_fps=", rb_set_target_fps, 1);
   rb_define_module_function(rb_mGraphics, "fps=", rb_set_target_fps, 1); // target_fps= alias

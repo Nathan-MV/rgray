@@ -7,65 +7,22 @@ set(SRC_FILES
 )
 
 # ---- Dependencies ----
-
-# raylib
-CPMAddPackage(NAME raylib
-  GIT_REPOSITORY https://github.com/Nathan-MV/raylib.git
-  GIT_TAG ba8460d74cd5086fbdc47a49ce5bb91b1377d1d5
-)
-
 set_target_properties(raylib PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-# set(PLATFORM_CPP "PLATFORM_DESKTOP_RGFW")
+#set(PLATFORM_CPP "PLATFORM_DESKTOP_RGFW")
 #set(GRAPHICS "GRAPHICS_API_OPENGL_43")
 #set(OPENGL_VERSION "4.3")
-
-# raygui
-CPMAddPackage(NAME raygui
-  GIT_REPOSITORY https://github.com/Nathan-MV/raygui.git
-  GIT_TAG e496ee4430aed72ab8edb477568507b230da69bd
-)
-
 target_compile_definitions(raygui PRIVATE RAYGUI_IMPLEMENTATION)
 set_target_properties(raygui PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-# reasings
-CPMAddPackage(NAME reasings
-  GIT_REPOSITORY https://github.com/Nathan-MV/reasings.git
-  GIT_TAG 919079c7a9fb883399f4d4a801ad4132f1f442f5
-)
-
 set_target_properties(reasings PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-# rapidcsv
-CPMAddPackage(NAME rapidcsv
-  GIT_REPOSITORY https://github.com/d99kris/rapidcsv.git
-  GIT_TAG a98b85e663114b8fdc9c0dc03abf22c296f38241
-)
 
 # ---- Add Libraries ----
 
 add_library(${PROJECT_NAME}_static STATIC ${SRC_FILES})
+#add_library(${PROJECT_NAME}::${PROJECT_NAME}_static ALIAS ${PROJECT_NAME}_static)
 
 # ---- Setup common library properties ----
 
 function(setup_library target)
-  target_include_directories(${target}
-    PUBLIC
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-      $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
-    PRIVATE
-      ${CMAKE_CURRENT_SOURCE_DIR}
-      ${CMAKE_CURRENT_SOURCE_DIR}/include
-      ${raylib_SOURCE_DIR}/src
-      ${raygui_SOURCE_DIR}/src
-      ${reasings_SOURCE_DIR}/src
-  )
-
-  set_target_properties(${target} PROPERTIES
-    INTERPROCEDURAL_OPTIMIZATION TRUE
-  )
-
   # Define libraries required on linking
   if (WIN32)
     # Libraries for Windows desktop compilation
@@ -98,7 +55,41 @@ function(setup_library target)
     list(APPEND LINK_LIBS X11 Xrandr Xinerama Xi Xxf86vm Xcursor)
   endif()
 
-  target_link_libraries(${target} rapidcsv raylib raygui reasings ${LINK_LIBS})
+  target_link_libraries(${target} 
+    myproject_options
+    #myproject_warnings
+    rapidcsv raylib raygui reasings
+    ${LINK_LIBS}
+  )
+
+  target_include_directories(${target}
+    ${WARNING_GUARD}
+    PUBLIC
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${raylib_SOURCE_DIR}/src
+      ${raygui_SOURCE_DIR}/src
+      ${reasings_SOURCE_DIR}/src
+  )
+
+  target_compile_features(${target} PUBLIC cxx_std_23)
+
+  set_target_properties(
+    ${target}
+    PROPERTIES VERSION ${PROJECT_VERSION}
+              CXX_VISIBILITY_PRESET hidden
+              #VISIBILITY_INLINES_HIDDEN YES
+  )
+
+  #generate_export_header(${target} EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/myproject/sample_library_export.hpp)
+
+  if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${target} PUBLIC SAMPLE_LIBRARY_STATIC_DEFINE)
+  endif()
 endfunction()
 
 # ---- Setup static (for executables) and shared (for CRuby extension) libraries ----

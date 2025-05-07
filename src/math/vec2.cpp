@@ -1,41 +1,41 @@
 #include "rgray/math/vec2.h"
+#include <cstdio>
+#include <string>
+#include "raylib.h"
+#include "raymath.h"
+#include "rgray/system/kernel.h"
 
-// Divide Vec2 by an integer
-Vector2 Vector2DivideValue(Vector2 v, float div) {
-  Vector2 result = {v.x / div, v.y / div};
-
-  return result;
+Vector2 Vector2DivideValue(Vector2 vector, float divisor) {
+  return {vector.x / divisor, vector.y / divisor};
 }
 
 Vector2 Vector2RandomMovement(Vector2 &position, float speed, const std::string &direction) {
-  Vector2 random_direction = {GetRandomFloat(-1.0f, 1.0f), GetRandomFloat(-1.0f, 1.0f)};
+  Vector2 randomDirection = {GetRandomFloat(-1.0F, 1.0F), GetRandomFloat(-1.0F, 1.0F)};
 
   if (direction == "up") {
-    random_direction.y = GetRandomFloat(-1.0f, 0.0f);
+    randomDirection.y = GetRandomFloat(-1.0F, 0.0F);
   } else if (direction == "down") {
-    random_direction.y = GetRandomFloat(0.0f, 1.0f);
+    randomDirection.y = GetRandomFloat(0.0F, 1.0F);
   } else if (direction == "right") {
-    random_direction.x = GetRandomFloat(0.0f, 1.0f);
+    randomDirection.x = GetRandomFloat(0.0F, 1.0F);
   } else if (direction == "left") {
-    random_direction.x = GetRandomFloat(-1.0f, 0.0f);
+    randomDirection.x = GetRandomFloat(-1.0F, 0.0F);
   }
 
-  auto velocity = Vector2Scale(random_direction, speed);
-  auto delta_velocity = Vector2Scale(velocity, GetFrameTime());
-  Vector2 new_position = Vector2Add(position, delta_velocity);
+  const Vector2 velocity = Vector2Scale(randomDirection, speed);
+  const Vector2 deltaVelocity = Vector2Scale(velocity, GetFrameTime());
+  Vector2 newPosition = Vector2Add(position, deltaVelocity);
 
-  new_position.x = Clamp(new_position.x, 0.0f, static_cast<float>(GetScreenWidth()));
-  new_position.y = Clamp(new_position.y, 0.0f, static_cast<float>(GetScreenHeight()));
+  newPosition.x = Clamp(newPosition.x, 0.0F, static_cast<float>(GetScreenWidth()));
+  newPosition.y = Clamp(newPosition.y, 0.0F, static_cast<float>(GetScreenHeight()));
 
-  return new_position;
+  return newPosition;
 }
 
-bool Vector2IsZero(const Vector2 &vec2) { return (vec2.x == 0 && vec2.y == 0); }
+bool Vector2IsZero(const Vector2 &vector) { return (vector.x == 0.0F && vector.y == 0.0F); }
 
-std::string Vector2ToString(const Vector2 &vec2) {
-  char buffer[50];
-
-  snprintf(buffer, sizeof(buffer), "Vec2(x: %.2f, y: %.2f)", vec2.x, vec2.y);
-
-  return std::string(buffer);
+std::string Vector2ToString(const Vector2 &vector) {
+  char buffer[64];
+  snprintf(buffer, sizeof(buffer), "Vec2(x: %.2f, y: %.2f)", vector.x, vector.y);
+  return {buffer};
 }

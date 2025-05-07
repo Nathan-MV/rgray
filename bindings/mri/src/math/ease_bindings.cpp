@@ -1,14 +1,14 @@
 #include <math/ease_bindings.h>
 
-RB_EASE(rb_ease_linear, EaseLinear)
-RB_EASE(rb_ease_sine, EaseSine)
-RB_EASE(rb_ease_circ, EaseCirc)
-RB_EASE(rb_ease_cubic, EaseCubic)
-RB_EASE(rb_ease_quad, EaseQuad)
-RB_EASE(rb_ease_expo, EaseExpo)
-RB_EASE(rb_ease_back, EaseBack)
-RB_EASE(rb_ease_bounce, EaseBounce)
-RB_EASE(rb_ease_elastic, EaseElastic)
+RB_METHOD_EASE(rb_ease_linear, EaseLinear)
+RB_METHOD_EASE(rb_ease_sine, EaseSine)
+RB_METHOD_EASE(rb_ease_circ, EaseCirc)
+RB_METHOD_EASE(rb_ease_cubic, EaseCubic)
+RB_METHOD_EASE(rb_ease_quad, EaseQuad)
+RB_METHOD_EASE(rb_ease_expo, EaseExpo)
+RB_METHOD_EASE(rb_ease_back, EaseBack)
+RB_METHOD_EASE(rb_ease_bounce, EaseBounce)
+RB_METHOD_EASE(rb_ease_elastic, EaseElastic)
 
 // Initializes the Ease module and defines its functions
 extern "C" void Init_Ease() {

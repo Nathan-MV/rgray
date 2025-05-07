@@ -19,6 +19,5 @@
 // RLAPI float GetMusicTimePlayed(Music music);                          // Get current music time played (in seconds)
 
 extern "C" void Init_Music() {
-  VALUE rb_mMusic = rb_define_module("Music");
-
+  //VALUE rb_mMusic = rb_define_module("Music");
 }

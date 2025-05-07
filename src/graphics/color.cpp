@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // Helper function to check if a string is numeric
 bool is_numeric(const char *str) {
@@ -36,7 +37,7 @@ Color ColorFromHex(const char *hex_arg) {
   }
   // Check if the input is a numeric string
   else if (is_numeric(hex_arg)) {
-    hex = (unsigned int)strtoul(hex_arg, NULL, 10);
+    hex = static_cast<unsigned int>(strtoul(hex_arg, NULL, 10));
   } else {
     // Invalid input, return default color
     return color;  // Default color: black with full alpha
@@ -49,4 +50,20 @@ Color ColorFromHex(const char *hex_arg) {
   color.a = (hex >> 24) & 0xFF;
 
   return color;
+}
+
+// Convert a single sRGB component (0–255) to linear space (0.0–1.0)
+static inline float SRGBToLinear(unsigned char c) {
+    auto cs = c / 255.0f;
+
+    return (cs <= 0.04045f) ? (cs / 12.92f) : powf((cs + 0.055f) / 1.055f, 2.4f);
+}
+
+// Compute relative luminance in linear space from a Color
+float ColorGetLuminance(Color color) {
+    auto r = SRGBToLinear(color.r);
+    auto g = SRGBToLinear(color.g);
+    auto b = SRGBToLinear(color.b);
+
+    return 0.2126f * r + 0.7152f * g + 0.0722f * b;
 }

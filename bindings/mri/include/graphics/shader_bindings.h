@@ -1,33 +1,27 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "../ruby_values.h"
+#include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 extern VALUE rb_cShader;
 extern "C" void Init_Shader();
 
-inline Shader *get_shader(VALUE obj) {
-  Shader *shader;
-  Data_Get_Struct(obj, Shader, shader);
-
-  return shader;
+// Free the Shader object
+// This function is called when the Ruby object is garbage collected
+template <class T>
+void free_shader(void* data) {
+	T* ptr = reinterpret_cast<T*>(data);
+	UnloadShader(*ptr);
+	delete ptr;
 }
 
-template <typename T> void rb_shader_free(void *ptr) {
-  T *obj = static_cast<T *>(ptr);
-  UnloadShader(*obj);
-  delete obj;
-}
-
-template <typename T> VALUE rb_shader_alloc(VALUE klass) {
-  try {
-    T *obj = new T();
-    return Data_Wrap_Struct(klass, nullptr, rb_shader_free<T>, obj);
-  } catch (const std::bad_alloc &e) {
-    rb_raise(rb_eNoMemError, "Failed to allocate memory for %s.", typeid(T).name());
-    return Qnil;
-  }
+// Allocates and wraps a new instance of Shader
+// This function is called when the Ruby object is created
+template <class T>
+VALUE alloc_shader(VALUE klass) {
+	return Data_Wrap_Struct(klass, rb::mark<T>, free_shader<T>, new T());
 }
 
 #endif // SHADER_H

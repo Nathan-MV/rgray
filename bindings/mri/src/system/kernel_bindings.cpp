@@ -16,7 +16,6 @@
 // RLAPI unsigned int *ComputeSHA1(unsigned char *data, int dataSize);      // Compute SHA1 hash code, returns static int[5] (20 bytes)
 
 RB_METHOD_INT_ARG_INT_INT(rb_get_random_value, GetRandomValue)
-//RB_METHOD_INT_ARG(rb_fibonacci, fibonacci)
 
 static VALUE rb_load_csv(int argc, VALUE* argv, VALUE self) {
   VALUE str;
@@ -49,18 +48,7 @@ static VALUE rb_load_csv(int argc, VALUE* argv, VALUE self) {
   return ret;
 }
 
-// Wrapper for the levenshtein_distance function
-// VALUE rb_levenshtein_distance(VALUE self, VALUE str1, VALUE str2) {
-//   std::string s1 = StringValueCStr(str1);
-//   std::string s2 = StringValueCStr(str2);
-//   int result = levenshtein_distance(s1, s2);
-//   return INT2NUM(result);
-// }
-
 extern "C" void Init_Kernel() {
   rb_define_module_function(rb_mKernel, "random", rb_get_random_value, 2);
-
-  //rb_define_module_function(rb_mKernel, "fib", rb_fibonacci, 1);
-  // rb_define_module_function(rb_mKernel, "levenshtein_distance", rb_levenshtein_distance, 2);
   rb_define_module_function(rb_mKernel, "load_csv", rb_load_csv, -1);
 }

@@ -37,11 +37,11 @@ static int *get_int_array(VALUE rb_array) {
 
   long length = RARRAY_LEN(rb_array);
   if (length == 0) {
-    return NULL;  // No need to allocate memory for an empty array
+    return nullptr;  // No need to allocate memory for an empty array
   }
 
   int *int_array = (int *)malloc(length * sizeof(int));  // Use malloc for heap allocation
-  if (int_array == NULL) {
+  if (int_array == nullptr) {
     rb_raise(rb_eNoMemError, "Failed to allocate memory");
   }
 
@@ -52,156 +52,142 @@ static int *get_int_array(VALUE rb_array) {
   return int_array;  // Safe to return as it's allocated on the heap
 }
 
-// Base macro to define a Ruby method
+// Base Ruby method wrappers without result
 #define RB_METHOD(name, func)    \
   static auto name(VALUE self) { \
     func();                      \
     return self;                 \
   }
-
-// Common macro for single argument methods
-#define RB_METHOD_ARG(name, func, ret, argtype) \
-  static auto name(VALUE self, VALUE arg) {     \
-    func(argtype(arg));                         \
-    return ret;                                 \
+#define RB_METHOD_RESULT(name, func, wrap) \
+  static auto name(VALUE self) {           \
+    auto res = func();                     \
+    return wrap(res);                      \
+  }
+#define RB_METHOD_RESULT_CONST(name, func, wrap) \
+  static auto name(VALUE self) {                 \
+    const auto* res = func();                    \
+    return wrap(res);                            \
   }
 
-// Specific argument type macros
+// Macros for a single argument
+#define RB_METHOD_ARG(name, func, ret, conv) \
+  static auto name(VALUE self, VALUE arg) {  \
+    func(conv(arg));                         \
+    return ret;                              \
+  }
+#define RB_METHOD_RESULT_ARG(name, func, wrap, conv) \
+  static auto name(VALUE self, VALUE arg) {          \
+    auto res = func(conv(arg));                      \
+    return wrap(res);                                \
+  }
+#define RB_METHOD_RESULT_CONST_ARG(name, func, wrap, conv) \
+  static auto name(VALUE self, VALUE arg) {                \
+    const auto* res = func(conv(arg));                     \
+    return wrap(res);                                      \
+  }
+
+// Two argument macros
+#define RB_METHOD_ARG_2(name, func, ret, conv1, conv2) \
+  static auto name(VALUE self, VALUE a1, VALUE a2) {   \
+    func(conv1(a1), conv2(a2));                        \
+    return ret;                                        \
+  }
+#define RB_METHOD_RESULT_ARG_2(name, func, wrap, conv1, conv2) \
+  static auto name(VALUE self, VALUE a1, VALUE a2) {           \
+    auto res = func(conv1(a1), conv2(a2));                     \
+    return wrap(res);                                          \
+  }
+
+// Three argument macros
+#define RB_METHOD_ARG_3(name, func, ret, conv1, conv2, conv3)  \
+  static auto name(VALUE self, VALUE a1, VALUE a2, VALUE a3) { \
+    func(conv1(a1), conv2(a2), conv3(a3));                     \
+    return ret;                                                \
+  }
+#define RB_METHOD_RESULT_ARG_3(name, func, wrap, conv1, conv2, conv3) \
+  static auto name(VALUE self, VALUE a1, VALUE a2, VALUE a3) {        \
+    auto res = func(conv1(a1), conv2(a2), conv3(a3));                 \
+    return wrap(res);                                                 \
+  }
+
+// Four argument macros
+#define RB_METHOD_ARG_4(name, func, ret, conv1, conv2, conv3, conv4)     \
+  static auto name(VALUE self, VALUE a1, VALUE a2, VALUE a3, VALUE a4) { \
+    func(conv1(a1), conv2(a2), conv3(a3), conv4(a4));                    \
+    return ret;                                                          \
+  }
+#define RB_METHOD_RESULT_ARG_4(name, func, wrap, conv1, conv2, conv3, conv4) \
+  static auto name(VALUE self, VALUE a1, VALUE a2, VALUE a3, VALUE a4) {     \
+    auto res = func(conv1(a1), conv2(a2), conv3(a3), conv4(a4));             \
+    return wrap(res);                                                        \
+  }
+
+// Normal macros
+#define RB_METHOD_INT(name, func) RB_METHOD_RESULT(name, func, INT2NUM)
+#define RB_METHOD_FLOAT(name, func) RB_METHOD_RESULT(name, func, DBL2NUM)
+
+// Const macros
+#define RB_METHOD_CONST_STR(name, func) RB_METHOD_RESULT_CONST(name, func, rb_str_new_cstr)
+
+// Specific single argument type macros
 #define RB_METHOD_ARG_STR(name, func, ret) RB_METHOD_ARG(name, func, ret, StringValueCStr)
 #define RB_METHOD_ARG_INT(name, func, ret) RB_METHOD_ARG(name, func, ret, NUM2INT)
 #define RB_METHOD_ARG_UINT(name, func, ret) RB_METHOD_ARG(name, func, ret, NUM2UINT)
-#define RB_METHOD_ARG_FLOAT(name, func, ret) RB_METHOD_ARG(name, func, ret, NUM2DBL)
+#define RB_METHOD_ARG_FLOAT(name, func, ret) RB_METHOD_ARG(name, func, ret, NUM2FLT)
 #define RB_METHOD_ARG_IMG(name, func, ret) RB_METHOD_ARG(name, func, ret, *get_image)
+#define RB_METHOD_INT_ARG(name, func) RB_METHOD_RESULT_ARG(name, func, INT2NUM, NUM2INT)
+#define RB_METHOD_INT_ARG_STR(name, func) RB_METHOD_RESULT_ARG(name, func, INT2NUM, StringValueCStr)
+#define RB_METHOD_CONST_STR_ARG_INT(name, func) \
+  RB_METHOD_RESULT_CONST_ARG(name, func, rb_str_new_cstr, NUM2INT)
 
-// Common macro for two argument methods
-#define RB_METHOD_ARG_2(name, func, ret, argtype1, argtype2) \
-  static auto name(VALUE self, VALUE arg1, VALUE arg2) {     \
-    func(argtype1(arg1), argtype2(arg2));                    \
-    return ret;                                              \
-  }
-
-// Specific argument type macro for two arguments
+// Specific two-argument macros
 #define RB_METHOD_ARG_INT_INT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, NUM2INT, NUM2INT)
-#define RB_METHOD_ARG_FLOAT_FLOAT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, NUM2DBL, NUM2DBL)
-#define RB_METHOD_ARG_IMG_INT(name, func, ret) \
-  RB_METHOD_ARG_2(name, func, ret, get_image, NUM2INT)
+#define RB_METHOD_ARG_FLOAT_FLOAT(name, func, ret) \
+  RB_METHOD_ARG_2(name, func, ret, NUM2FLT, NUM2FLT)
+#define RB_METHOD_ARG_IMG_INT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, get_image, NUM2INT)
+#define RB_METHOD_INT_ARG_INT_INT(name, func) \
+  RB_METHOD_RESULT_ARG_2(name, func, INT2NUM, NUM2INT, NUM2INT)
+#define RB_METHOD_FLOAT_ARG_INT_INT(name, func) \
+  RB_METHOD_RESULT_ARG_2(name, func, DBL2NUM, NUM2INT, NUM2INT)
 
-// Common macro for three argument methods
-#define RB_METHOD_ARG_3(name, func, ret, argtype1, argtype2, argtype3) \
-  static auto name(VALUE self, VALUE arg1, VALUE arg2, VALUE arg3) {  \
-    func(argtype1(arg1), argtype2(arg2), argtype3(arg3));              \
-    return ret;                                                       \
-  }
-
-// Specific argument type macro for three arguments
+// Specific three-argument macros
 #define RB_METHOD_ARG_INT_INT_INT(name, func, ret) \
   RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, NUM2INT)
 #define RB_METHOD_ARG_INT_INT_STR(name, func, ret) \
   RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, StringValueCStr)
+#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(name, func) \
+  RB_METHOD_RESULT_ARG_3(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT)
 
-// Common macro for four argument methods
-#define RB_METHOD_ARG_4(name, func, ret, argtype1, argtype2, argtype3, argtype4) \
-  static auto name(VALUE self, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {  \
-    func(argtype1(arg1), argtype2(arg2), argtype3(arg3), argtype4(arg4));              \
-    return ret;                                                       \
-  }
-
+// Specific four-argument macro
+#define RB_METHOD_INT_FLOAT_FLOAT_FLOAT(name, func, ret) \
+  RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
+#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT_FLOAT(name, func) \
+  RB_METHOD_RESULT_ARG_4(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT, NUM2FLT)
 #define RB_METHOD_ARG_INT_FLOAT_FLOAT_FLOAT(name, func, ret) \
-  RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2DBL, NUM2DBL, NUM2DBL)
+  RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
 
-// Base macro to define a Ruby method with result
-#define RB_METHOD_RESULT(name, func, ret)    \
-  static auto name(VALUE self) { \
-    auto result = func();                      \
-    return ret(result);                 \
-  }
-
-#define RB_METHOD_INT(name, func) RB_METHOD_RESULT(name, func, INT2NUM)
-#define RB_METHOD_FLOAT(name, func) RB_METHOD_RESULT(name, func, DBL2NUM)
-
-// Base macro to define a Ruby method with result constant
-#define RB_METHOD_RESULT_CONST(name, func, ret) \
-  static auto name(VALUE self) {                \
-    const auto *result = func();                \
-    return ret(result);                         \
-  }
-
-#define RB_METHOD_CONST_STR(name, func) RB_METHOD_RESULT_CONST(name, func, rb_str_new_cstr)
-
-// Common macro for single argument methods with result
-#define RB_METHOD_RESULT_ARG(name, func, ret, argtype) \
-  static auto name(VALUE self, VALUE arg) {     \
-    auto result = func(argtype(arg));                         \
-    return ret(result);                                 \
-  }
-
-// Specific argument type macros for one argument with result
-#define RB_METHOD_INT_ARG(name, func) RB_METHOD_RESULT_ARG(name, func, INT2NUM, NUM2INT)
-
-#define RB_METHOD_INT_ARG_STR(name, func) \
-  RB_METHOD_RESULT_ARG(name, func, INT2NUM, StringValueCStr)
-
-// Common macro for single argument methods with result constant
-#define RB_METHOD_RESULT_CONST_ARG(name, func, ret, argtype) \
-  static auto name(VALUE self, VALUE arg) {                  \
-    const auto *result = func(argtype(arg));                 \
-    return ret(result);                                      \
-  }
-
-#define RB_METHOD_CONST_STR_ARG_INT(name, func) \
-  RB_METHOD_RESULT_CONST_ARG(name, func, rb_str_new_cstr, NUM2INT)
-
-// Common macro for two argument methods with result
-#define RB_METHOD_RESULT_ARG_2(name, func, ret, argtype1, argtype2) \
-  static auto name(VALUE self, VALUE arg1, VALUE arg2) {     \
-    auto result = func(argtype1(arg1), argtype2(arg2));                    \
-    return ret(result);                                              \
-  }
-
-// Specific argument type macros for two arguments with result
-#define RB_METHOD_INT_ARG_INT_INT(name, func) \
-  RB_METHOD_RESULT_ARG_2(name, func, INT2NUM, NUM2INT, NUM2INT)
-
-#define RB_METHOD_FLOAT_ARG_INT_INT(name, func) \
-  RB_METHOD_RESULT_ARG_2(name, func, DBL2NUM, NUM2INT, NUM2INT)
-
-// Boolean
-
+// Boolean macros
 #define RB_METHOD_BOOL(name, func) \
   static auto name(VALUE self) { return func() ? Qtrue : Qfalse; }
-
-#define RB_METHOD_BOOL_ARG_INT(name, func)    \
-  static auto name(VALUE self, VALUE value) { \
-    auto val = NUM2INT(value);                \
-    return func(val) ? Qtrue : Qfalse;        \
+#define RB_METHOD_BOOL_ARG_INT(name, func) \
+  static auto name(VALUE self, VALUE val) { return func(NUM2INT(val)) ? Qtrue : Qfalse; }
+#define RB_METHOD_BOOL_ARG_INT_INT(name, func)            \
+  static auto name(VALUE self, VALUE a, VALUE b) {        \
+    return func(NUM2INT(a), NUM2INT(b)) ? Qtrue : Qfalse; \
   }
+#define RB_METHOD_BOOL_ARG_UINT(name, func) \
+  static auto name(VALUE self, VALUE val) { return func(NUM2UINT(val)) ? Qtrue : Qfalse; }
 
-#define RB_METHOD_BOOL_ARG_INT_INT(name, func)                 \
-  static auto name(VALUE self, VALUE value1, VALUE value2) { \
-    auto val1 = NUM2INT(value1);                             \
-    auto val2 = NUM2INT(value2);                             \
-    return func(val1, val2) ? Qtrue : Qfalse;                \
+// Wrapper for vector objects (example for a Vector2 type)
+#define RB_METHOD_TO_VEC2(name, func)                                             \
+  static auto name(VALUE self) {                                               \
+    auto res = func();                                                         \
+    return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
-
-#define RB_METHOD_BOOL_ARG_UINT(name, func)   \
-  static auto name(VALUE self, VALUE value) { \
-    auto val = NUM2UINT(value);               \
-    return func(val) ? Qtrue : Qfalse;        \
-  }
-
-// Wrappers
-
-#define RB_METHOD_VEC2(name, func)                                    \
-  static auto name(VALUE self) {                                      \
-    auto result = func();                                             \
-    return Data_Wrap_Struct(rb_cVec2, NULL, rb_object_free<Vector2>, &result); \
-  }
-
 #define RB_METHOD_VEC2_ARG_INT(name, func)                                     \
-  static auto name(VALUE self, VALUE value) {                                  \
-    auto val = NUM2INT(value);                                                 \
-    auto result = func(val);                                                   \
-    return Data_Wrap_Struct(rb_cVec2, NULL, rb_object_free<Vector2>, &result); \
+  static auto name(VALUE self, VALUE val) {                                    \
+    auto res = func(NUM2INT(val));                                             \
+    return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
 
 #endif  // RUBY_VALUES_H

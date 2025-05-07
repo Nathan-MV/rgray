@@ -12,11 +12,11 @@ RB_METHOD_INT(rb_get_gesture_detected, GetGestureDetected)
 // RLAPI float GetGestureHoldDuration(void);               // Get gesture hold time in seconds
 RB_METHOD_FLOAT(rb_get_gesture_hold_duration, GetGestureHoldDuration)
 // RLAPI Vector2 GetGestureDragVector(void);               // Get gesture drag vector
-RB_METHOD_VEC2(rb_get_gesture_drag_vector, GetGestureDragVector)
+RB_METHOD_TO_VEC2(rb_get_gesture_drag_vector, GetGestureDragVector)
 // RLAPI float GetGestureDragAngle(void);                  // Get gesture drag angle
 RB_METHOD_FLOAT(rb_get_gesture_drag_angle, GetGestureDragAngle)
 // RLAPI Vector2 GetGesturePinchVector(void);              // Get gesture pinch delta
-RB_METHOD_VEC2(rb_get_gesture_pinch_vector, GetGesturePinchVector)
+RB_METHOD_TO_VEC2(rb_get_gesture_pinch_vector, GetGesturePinchVector)
 // RLAPI float GetGesturePinchAngle(void);                 // Get gesture pinch angle
 RB_METHOD_FLOAT(rb_get_gesture_pinch_angle, GetGesturePinchAngle)
 

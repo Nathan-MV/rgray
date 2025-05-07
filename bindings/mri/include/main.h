@@ -7,6 +7,7 @@
 #include <string>
 
 #include "ruby_values.h"
+#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
 
 #include "math/rect_bindings.h"
@@ -20,6 +21,7 @@
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
+#include "math/math_bindings.h"
 #include "system/graphics_bindings.h"
 #include "graphics/gui_bindings.h"
 #include "math/ease_bindings.h"
@@ -32,6 +34,9 @@
 #include "graphics/font_bindings.h"
 #include "audio/audio_bindings.h"
 #include "physics/camera_bindings.h"
+
+extern VALUE rb_mRGRAY;
+extern VALUE rb_eRGRAYError;
 
 extern "C" {
   void Init_rgray(void);
