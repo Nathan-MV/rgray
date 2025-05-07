@@ -64,34 +64,42 @@ static auto rb_load_image_raw(VALUE self, VALUE rb_file_name, VALUE rb_width, VA
 }
 // RLAPI Image LoadImageAnim(const char *fileName, int *frames);
 static auto rb_load_image_anim(VALUE self, VALUE rb_file_name, VALUE rb_frames) {
-  auto* fileName = StringValueCStr(rb_file_name);
-  auto* frames = get_int_array(rb_frames);
+    const char* fileName = StringValueCStr(rb_file_name);
 
-  auto& img = rb::get<Image>(self);
+    // Prepare a temporary frame count variable
+    int frameCount = 0;
 
-  img = LoadImageAnim(fileName, frames);
+    // Load image animation
+    auto& img = rb::get<Image>(self);
+    img = LoadImageAnim(fileName, &frameCount);
 
-  free(frames);
+    // Update the Ruby frame count (if passed in as an array with one element)
+    if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
+        rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
+    }
 
-  return self;
+    return self;
 }
-// RLAPI Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int
-// dataSize, int *frames);
+// RLAPI Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames);
 static auto rb_load_image_anim_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data,
                                            VALUE rb_data_size, VALUE rb_frames) {
-  auto* fileType = StringValueCStr(rb_file_type);
-  const unsigned char *fileData
-      = reinterpret_cast<const unsigned char *>(RSTRING_PTR(rb_file_data));
-  auto dataSize = NUM2INT(rb_data_size);
-  auto* frames = get_int_array(rb_frames);
+    const auto* fileType = StringValueCStr(rb_file_type);
+    const unsigned char* fileData = reinterpret_cast<const unsigned char*>(RSTRING_PTR(rb_file_data));
+    int dataSize = NUM2INT(rb_data_size);
 
-  auto& img = rb::get<Image>(self);
+    // Temporary variable for frame count
+    int frameCount = 0;
 
-  img = LoadImageAnimFromMemory(fileType, fileData, dataSize, frames);
+    // Load the image
+    auto& img = rb::get<Image>(self);
+    img = LoadImageAnimFromMemory(fileType, fileData, dataSize, &frameCount);
 
-  free(frames);
+    // Update Ruby array with frame count
+    if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
+        rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
+    }
 
-  return self;
+    return self;
 }
 // RLAPI Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
 static auto rb_load_image_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data,
@@ -386,27 +394,31 @@ static auto rb_image_blur_gaussian(VALUE self, VALUE rb_blur_size) {
 }
 // RLAPI void ImageKernelConvolution(Image *image, const float *kernel, int kernelSize);                    // Apply custom square convolution kernel to image
 static auto rb_image_kernel_convolution(VALUE self, VALUE rb_kernel, VALUE rb_kernel_size) {
-  // Get the image pointer
-  auto& img = rb::get<Image>(self);
+    // Get the image reference from Ruby object
+    auto& img = rb::get<Image>(self);
 
-  // Convert the Ruby kernel array to a C array of floats
-  Check_Type(rb_kernel, T_ARRAY);  // Ensure rb_kernel is an array
-  auto kernel_size = NUM2INT(rb_kernel_size);
-  auto* kernel = new float[kernel_size * kernel_size];  // Allocate memory for the kernel
+    // Validate and extract kernel size
+    Check_Type(rb_kernel, T_ARRAY);
+    int kernel_size = NUM2INT(rb_kernel_size);
+    int total_elements = kernel_size * kernel_size;
 
-  // Populate the kernel array
-  for (int i = 0; i < kernel_size * kernel_size; ++i) {
-    auto rb_elem = rb_ary_entry(rb_kernel, i);
-    kernel[i] = NUM2FLT(rb_elem);
-  }
+    if (RARRAY_LEN(rb_kernel) != total_elements) {
+        rb_raise(rb_eArgError, "Kernel array size must be kernel_size * kernel_size");
+    }
 
-  // Apply the kernel to the image
-  ImageKernelConvolution(&img, kernel, kernel_size);
+    // Use std::vector for safe memory management
+    std::vector<float> kernel;
+    kernel.reserve(total_elements);
 
-  // Clean up
-  delete[] kernel;
+    for (int i = 0; i < total_elements; ++i) {
+        VALUE rb_elem = rb_ary_entry(rb_kernel, i);
+        kernel.push_back(NUM2FLT(rb_elem));
+    }
 
-  return self;
+    // Apply the kernel
+    ImageKernelConvolution(&img, kernel.data(), kernel_size);
+
+    return self;
 }
 // RLAPI void ImageResize(Image *image, int newWidth, int newHeight);                                       // Resize image (Bicubic scaling algorithm)
 static auto rb_image_resize(VALUE self, VALUE rb_new_width, VALUE rb_new_height) {

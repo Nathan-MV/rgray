@@ -18,6 +18,10 @@
 #   @return [void]
 
 # @!method load_anim_from_memory
+#   @param fileType [String]
+#   @param fileData [String]
+#   @param dataSize [Integer]
+#   @param frames [Integer]
 #   @return [void]
 
 # @!method from_memory

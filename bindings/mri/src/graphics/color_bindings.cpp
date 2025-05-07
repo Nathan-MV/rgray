@@ -175,13 +175,13 @@ static auto rb_get_pixel_data_size(VALUE self, VALUE rb_width, VALUE rb_height, 
 
   return INT2NUM(size);
 }
-
+// RLAPI float ColorGetLuminance(Color color);              // Compute relative luminance in linear space from a Color
 static VALUE rb_color_get_luminance(VALUE self) {
-    auto& color = rb::get<Color>(self);
+  auto& color = rb::get<Color>(self);
 
-    float luminance = ColorGetLuminance(color);
+  auto luminance = ColorGetLuminance(color);
 
-    return DBL2NUM(luminance);
+  return DBL2NUM(luminance);
 }
 
 extern "C" void Init_Color() {

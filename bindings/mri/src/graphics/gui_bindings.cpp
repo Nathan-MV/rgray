@@ -1,4 +1,5 @@
 #include <graphics/gui_bindings.h>
+#include <cstring>
 
 // Global gui state control functions
 // RAYGUIAPI void GuiEnable(void);                                 // Enable gui controls (global state)
@@ -348,32 +349,32 @@ static auto rb_gui_grid(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_spa
 // RAYGUIAPI int GuiListView(RayRectangle bounds, const char *text, int *scrollIndex, int *active);          // List View control
 // Useless, hard limit of 128 items
 // RAYGUIAPI int GuiListViewEx(RayRectangle bounds, const char **text, int count, int *scrollIndex, int *active, int *focus); // List View with extended parameters
-static auto rb_gui_list_view_ex(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_scroll_index,
-                                VALUE rb_active) {
-  Check_Type(rb_text, T_ARRAY);
-  auto text_len = RARRAY_LEN(rb_text);
+static auto rb_gui_list_view_ex(VALUE self, VALUE rb_text, VALUE rb_bounds, VALUE rb_scroll_index, VALUE rb_active) {
+    // Ensure the text argument is an array
+    Check_Type(rb_text, T_ARRAY);
+    const auto text_len = RARRAY_LEN(rb_text);
 
-  // Allocate on heap to handle large arrays safely
-  const auto* *text = (const char **)calloc(text_len, sizeof(char *));
-  if (text == NULL) {
-    rb_raise(rb_eNoMemError, "Failed to allocate memory for text_val");
-  }
+    // Convert Ruby array to std::vector of C strings
+    std::vector<const char*> text;
+    text.reserve(text_len);
 
-  for (auto i = 0; i < text_len; i++) {
-    VALUE str = rb_ary_entry(rb_text, i);
-    text[i] = StringValueCStr(str);
-  }
+    for (int i = 0; i < text_len; ++i) {
+        VALUE str = rb_ary_entry(rb_text, i);
+        text.push_back(StringValueCStr(str));
+    }
 
-  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
+    // Extract and validate rectangle
+    auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
-  auto scrollIndex = NUM2INT(rb_scroll_index);
-  auto active = NUM2INT(rb_active);
+    // Extract scroll index and active value
+    auto scrollIndex = NUM2INT(rb_scroll_index);
+    auto active = NUM2INT(rb_active);
 
-  GuiListViewEx(*bounds, text, text_len, &scrollIndex, &active, NULL);
+    // Call the GUI function
+    GuiListViewEx(*bounds, text.data(), text_len, &scrollIndex, &active, nullptr);
 
-  free(text);
-
-  return rb_ary_new_from_args(2, INT2NUM(scrollIndex), INT2NUM(active));
+    // Return updated scrollIndex and active as a Ruby array
+    return rb_ary_new_from_args(2, INT2NUM(scrollIndex), INT2NUM(active));
 }
 // RAYGUIAPI int GuiMessageBox(RayRectangle bounds, const char *title, const char *message, const char *buttons); // Message Box control, displays a message
 static  auto rb_gui_message_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VALUE rb_message, VALUE rb_buttons) {
@@ -390,27 +391,35 @@ static  auto rb_gui_message_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VAL
 static auto rb_gui_text_input_box(VALUE self, VALUE rb_bounds, VALUE rb_title, VALUE rb_message,
                                   VALUE rb_buttons, VALUE rb_text, VALUE rb_text_max_size,
                                   VALUE rb_secret_view_active) {
-  const auto* title_str = StringValueCStr(rb_title);
-  const auto* message_str = StringValueCStr(rb_message);
-  const auto* buttons_str = StringValueCStr(rb_buttons);
-  auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
-  auto textMaxSize = NUM2INT(rb_text_max_size);
+    // Extract C strings from Ruby strings
+    const auto* title_str   = StringValueCStr(rb_title);
+    const auto* message_str = StringValueCStr(rb_message);
+    const auto* buttons_str = StringValueCStr(rb_buttons);
 
-  // Create a buffer for text that can be modified
-  char *text_buf = ALLOC_N(char, textMaxSize + 1);
-  strncpy(text_buf, StringValueCStr(rb_text), textMaxSize);
-  text_buf[textMaxSize] = '\0';  // Ensure null-termination
+    // Extract bounds
+    auto* bounds = rb::get_safe<RayRectangle>(rb_bounds, rb_cRect);
 
-  bool secretViewActive = RTEST(rb_secret_view_active);
+    // Extract max size and initialize buffer
+    auto textMaxSize = NUM2INT(rb_text_max_size);
+    std::vector<char> text_buf(textMaxSize + 1, '\0');
 
-  auto result = GuiTextInputBox(*bounds, title_str, message_str, buttons_str, text_buf, textMaxSize,
-                                &secretViewActive);
+    // Copy input text to buffer
+    const auto* input_text = StringValueCStr(rb_text);
+    std::strncpy(text_buf.data(), input_text, textMaxSize);
+    text_buf[textMaxSize] = '\0';  // Ensure null-termination
 
-  // Create the return array: result (true/false) and the potentially modified text
-  VALUE ret_text = rb_str_new_cstr(text_buf);
-  xfree(text_buf);  // Free the buffer after use
+    // Extract secretViewActive as a bool
+    bool secretViewActive = RTEST(rb_secret_view_active);
 
-  return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, ret_text);
+    // Call the input box function
+    auto result = GuiTextInputBox(*bounds, title_str, message_str, buttons_str, text_buf.data(),
+                                 textMaxSize, &secretViewActive);
+
+    // Create Ruby string from potentially modified buffer
+    VALUE ret_text = rb_str_new_cstr(text_buf.data());
+
+    // Return array: result (true/false) and modified text
+    return rb_ary_new_from_args(2, result != 0 ? Qtrue : Qfalse, ret_text);
 }
 // RAYGUIAPI int GuiColorPicker(RayRectangle bounds, const char *text, Color *color);                        // Color Picker control (multiple color controls)
 static auto rb_gui_color_picker(VALUE self, VALUE rb_bounds, VALUE rb_text, VALUE rb_color) {

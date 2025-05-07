@@ -54,16 +54,16 @@ Color ColorFromHex(const char *hex_arg) {
 
 // Convert a single sRGB component (0–255) to linear space (0.0–1.0)
 static inline float SRGBToLinear(unsigned char c) {
-    auto cs = c / 255.0f;
+  auto cs = c / 255.0f;
 
-    return (cs <= 0.04045f) ? (cs / 12.92f) : powf((cs + 0.055f) / 1.055f, 2.4f);
+  return (cs <= 0.04045f) ? (cs / 12.92f) : powf((cs + 0.055f) / 1.055f, 2.4f);
 }
 
 // Compute relative luminance in linear space from a Color
 float ColorGetLuminance(Color color) {
-    auto r = SRGBToLinear(color.r);
-    auto g = SRGBToLinear(color.g);
-    auto b = SRGBToLinear(color.b);
+  auto r = SRGBToLinear(color.r);
+  auto g = SRGBToLinear(color.g);
+  auto b = SRGBToLinear(color.b);
 
-    return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+  return 0.2126f * r + 0.7152f * g + 0.0722f * b;
 }

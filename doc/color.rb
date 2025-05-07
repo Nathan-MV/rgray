@@ -136,4 +136,6 @@
 #   @return [Integer]
 
 # @!method luminance
-#   @return [void]
+#   Compute relative luminance in linear space from a Color
+#   @param color [Color]
+#   @return [Float]
