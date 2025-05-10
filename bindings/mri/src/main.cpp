@@ -72,9 +72,24 @@ int initializeRubyInterpreter(const std::string& scriptPath) {
   return ruby_run_node(ruby_options(static_cast<int>(args.size()), const_cast<char**>(args.data())));
 }
 
+#ifdef _WIN32
+void attachToConsoleIfNeeded() {
+  // Attach to parent console if present
+  if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+  }
+}
+#endif
+
 int main(int argc, char** argv) {
 #ifdef HAVE_LOCALE_H
   std::setlocale(LC_CTYPE, "");
+#endif
+
+#ifdef _WIN32
+  attachToConsoleIfNeeded();
 #endif
 
   std::string scriptPath = determineScriptPath(argc, argv);

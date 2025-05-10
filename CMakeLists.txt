@@ -81,19 +81,12 @@ if(WIN32)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/rgray.rc.in
                  ${CMAKE_CURRENT_BINARY_DIR}/rgray.rc @ONLY)
 
-  # WIN32: for GUI mode (no console)
-  add_executable(${PROJECT_NAME}_release WIN32 
+  # WIN32: for GUI mode (attachable console)
+  add_executable(${PROJECT_NAME}_release WIN32
       $<TARGET_OBJECTS:${PROJECT_NAME}_static>
       ${CMAKE_CURRENT_BINARY_DIR}/rgray.rc
   )
   setup_executable(${PROJECT_NAME}_release)
-
-  # Console version
-  add_executable(${PROJECT_NAME}_console 
-      $<TARGET_OBJECTS:${PROJECT_NAME}_static>
-      ${CMAKE_CURRENT_BINARY_DIR}/rgray.rc
-  )
-  setup_executable(${PROJECT_NAME}_console)
 elseif(UNIX)
   configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/resources/rgray.desktop.in
