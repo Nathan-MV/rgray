@@ -1,5 +1,7 @@
-#include <graphics/font_bindings.h>
+#include "graphics/font_bindings.h"
 #include "ruby/internal/core/rstring.h"
+
+VALUE rb_cFont;
 
 //------------------------------------------------------------------------------------
 // Font Loading and Text Drawing Functions (Module: text)
@@ -9,9 +11,10 @@
 // RLAPI Font GetFontDefault(void);                                                            // Get the default Font
 // RLAPI Font LoadFont(const char *fileName);                                                  // Load font from file into GPU memory (VRAM)
 static auto rb_initialize_text(VALUE self, VALUE rb_filename) {
+  auto& font = rb::get<Font>(self);
   const auto* filename = StringValueCStr(rb_filename);
 
-  LoadFont(filename);
+  font = LoadFont(filename);
 
   return self;
 }
@@ -22,13 +25,21 @@ static auto rb_initialize_text(VALUE self, VALUE rb_filename) {
 // RLAPI GlyphInfo *LoadFontData(const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount, int type); // Load font data for further use
 // RLAPI Image GenImageFontAtlas(const GlyphInfo *glyphs, RayRectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
 // RLAPI void UnloadFontData(GlyphInfo *glyphs, int glyphCount);                               // Unload font chars info data (RAM)
+
 // RLAPI void UnloadFont(Font font);                                                           // Unload font from GPU memory (VRAM)
+static auto rb_unload_font(VALUE self) {
+  auto& font = rb::get<Font>(self);
+
+  UnloadFont(font);
+  rb::raw_dispose<Font>(self);
+
+  return self;
+}
 // RLAPI bool ExportFontAsCode(Font font, const char *fileName);                               // Export font as code file, returns true on success
 
 // Text drawing functions
 // RLAPI void RayDrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
-static auto rb_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos_y,
-                         VALUE rb_font_size, VALUE rb_color) {
+static auto rb_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos_y, VALUE rb_font_size, VALUE rb_color) {
   const auto* text = StringValueCStr(rb_text);
   auto posX = NUM2INT(rb_pos_x);
   auto posY = NUM2INT(rb_pos_y);
@@ -40,24 +51,21 @@ static auto rb_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos
   return self;
 }
 // RLAPI void RayDrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
-static auto rb_draw_text_ex(VALUE self, VALUE rb_text, VALUE rb_pos, VALUE rb_font_size,
-                            VALUE rb_spacing, VALUE rb_color) {
-  auto* font = get_font(self);
+static auto rb_draw_text_ex(VALUE self, VALUE rb_text, VALUE rb_pos, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_color) {
+  auto& font = rb::get<Font>(self);
   const auto* text = StringValueCStr(rb_text);
   auto* position = rb::get_safe<Vector2>(rb_pos, rb_cVec2);
   auto fontSize = NUM2FLT(rb_font_size);
   auto spacing = NUM2FLT(rb_spacing);
   auto* tint = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  RayDrawTextEx(*font, text, *position, fontSize, spacing, *tint);
+  RayDrawTextEx(font, text, *position, fontSize, spacing, *tint);
 
   return self;
 }
 // RLAPI void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
-static auto rb_draw_text_pro(VALUE self, VALUE rb_text, VALUE rb_position, VALUE rb_origin,
-                             VALUE rb_rotation, VALUE rb_font_size, VALUE rb_spacing,
-                             VALUE rb_tint) {
-  auto* font = get_font(self);
+static auto rb_draw_text_pro(VALUE self, VALUE rb_text, VALUE rb_position, VALUE rb_origin, VALUE rb_rotation, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_tint) {
+  auto& font = rb::get<Font>(self);
   const auto* text = StringValueCStr(rb_text);
   auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
   auto* origin = rb::get_safe<Vector2>(rb_origin, rb_cVec2);
@@ -66,28 +74,25 @@ static auto rb_draw_text_pro(VALUE self, VALUE rb_text, VALUE rb_position, VALUE
   auto spacing = NUM2FLT(rb_spacing);
   auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
-  DrawTextPro(*font, text, *position, *origin, rotation, fontSize, spacing, *tint);
+  DrawTextPro(font, text, *position, *origin, rotation, fontSize, spacing, *tint);
 
   return self;
 }
 // RLAPI void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint); // Draw one character (codepoint)
-static auto rb_draw_text_codepoint(VALUE self, VALUE rb_codepoint, VALUE rb_position,
-                                   VALUE rb_font_size, VALUE rb_tint) {
-  auto* font = get_font(self);
+static auto rb_draw_text_codepoint(VALUE self, VALUE rb_codepoint, VALUE rb_position, VALUE rb_font_size, VALUE rb_tint) {
+  auto& font = rb::get<Font>(self);
   auto codepoint = NUM2INT(rb_codepoint);
   auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
   auto fontSize = NUM2FLT(rb_font_size);
   auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
-  DrawTextCodepoint(*font, codepoint, *position, fontSize, *tint);
+  DrawTextCodepoint(font, codepoint, *position, fontSize, *tint);
 
   return self;
 }
 // RLAPI void DrawTextCodepoints(Font font, const int *codepoints, int codepointCount, Vector2 position, float fontSize, float spacing, Color tint); // Draw multiple character (codepoint)
-static auto rb_draw_text_codepoints(VALUE self, VALUE rb_codepoints, VALUE rb_codepoint_count,
-                                    VALUE rb_position, VALUE rb_font_size, VALUE rb_spacing,
-                                    VALUE rb_tint) {
-  auto* font = get_font(self);
+static auto rb_draw_text_codepoints(VALUE self, VALUE rb_codepoints, VALUE rb_codepoint_count, VALUE rb_position, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_tint) {
+  auto& font = rb::get<Font>(self);
   auto codepoints = NUM2INT(rb_codepoints);
   auto codepointCount = NUM2INT(rb_codepoint_count);
   auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
@@ -95,7 +100,7 @@ static auto rb_draw_text_codepoints(VALUE self, VALUE rb_codepoints, VALUE rb_co
   auto spacing = NUM2FLT(rb_spacing);
   auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
-  DrawTextCodepoints(*font, &codepoints, codepointCount, *position, fontSize, spacing, *tint);
+  DrawTextCodepoints(font, &codepoints, codepointCount, *position, fontSize, spacing, *tint);
 
   return self;
 }
@@ -113,12 +118,12 @@ static auto rb_measure_text(VALUE self, VALUE rb_text, VALUE rb_font_size) {
 }
 // RLAPI Vector2 MeasureTextEx(Font font, const char *text, float fontSize, float spacing);    // Measure string size for Font
 static auto rb_measure_text_ex(VALUE self, VALUE rb_text, VALUE rb_font_size, VALUE rb_spacing) {
-  auto* font = get_font(self);
+  auto& font = rb::get<Font>(self);
   const auto* text = StringValueCStr(rb_text);
   auto fontSize = NUM2FLT(rb_font_size);
   auto spacing = NUM2FLT(rb_spacing);
 
-  auto result = MeasureTextEx(*font, text, fontSize, spacing);
+  auto result = MeasureTextEx(font, text, fontSize, spacing);
 
   return rb::alloc_copy<Vector2>(rb_cVec2, result);
 }
@@ -145,8 +150,8 @@ static auto rb_measure_text_ex(VALUE self, VALUE rb_text, VALUE rb_font_size, VA
 // } FontType;
 
 extern "C" void Init_Font(void) {
-  VALUE rb_cFont = rb_define_class("Font", rb_cObject);
-  rb_define_alloc_func(rb_cFont, rb_font_alloc<Font>);
+  rb_cFont = rb_define_class("Font", rb_cObject);
+  rb_define_alloc_func(rb_cFont, alloc_font<Font>);
 
   rb_define_method(rb_cFont, "initialize", rb_initialize_text, 1);
   rb_define_method(rb_cFont, "draw", rb_draw_text, 5);
@@ -154,6 +159,8 @@ extern "C" void Init_Font(void) {
   rb_define_method(rb_cFont, "draw_pro", rb_draw_text_pro, 7);
   rb_define_method(rb_cFont, "draw_codepoint", rb_draw_text_codepoint, 4);
   rb_define_method(rb_cFont, "draw_codepoints", rb_draw_text_codepoints, 6);
+  rb_define_method(rb_cFont, "unload", rb_unload_font, 0);
+  rb_define_method(rb_cFont, "dispose", rb_unload_font, 0);  // alias for unload
 
   rb_define_method(rb_cFont, "measure", rb_measure_text, 2);
   rb_define_method(rb_cFont, "measure_ex", rb_measure_text_ex, 3);

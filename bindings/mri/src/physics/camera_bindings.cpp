@@ -1,4 +1,4 @@
-#include <physics/camera_bindings.h>
+#include "physics/camera_bindings.h"
 
 VALUE rb_cCamera;
 

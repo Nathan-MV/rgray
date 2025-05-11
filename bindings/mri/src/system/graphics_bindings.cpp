@@ -1,4 +1,4 @@
-#include <system/graphics_bindings.h>
+#include "system/graphics_bindings.h"
 
 // RLAPI void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
 RB_METHOD_ARG_INT_INT_STR(rb_init_window, InitWindow, self)
@@ -195,7 +195,7 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "min_size", rb_set_window_min_size, 2);
   rb_define_module_function(rb_mGraphics, "max_size", rb_set_window_max_size, 2);
   rb_define_module_function(rb_mGraphics, "size", rb_set_window_size, 2);
-  rb_define_module_function(rb_mGraphics, "resize_screen", rb_set_window_size, 2); // size alias
+  rb_define_module_function(rb_mGraphics, "resize_screen", rb_set_window_size, 2);  // size alias
   rb_define_module_function(rb_mGraphics, "opacity=", rb_set_window_opacity, 1);
   rb_define_module_function(rb_mGraphics, "focused", rb_set_window_focused, 0);
   rb_define_module_function(rb_mGraphics, "handle", rb_get_window_handle, 0);
@@ -215,9 +215,9 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "scale_dpi", rb_get_scale_dpi, 0);
   rb_define_module_function(rb_mGraphics, "monitor_name", rb_get_monitor_name, 1);
   rb_define_module_function(rb_mGraphics, "enable_event_waiting", rb_enable_event_waiting, 0);
-  rb_define_module_function(rb_mGraphics, "freeze", rb_enable_event_waiting, 0); // enable_event_waiting alias
+  rb_define_module_function(rb_mGraphics, "freeze", rb_enable_event_waiting, 0);  // enable_event_waiting alias
   rb_define_module_function(rb_mGraphics, "disable_event_waiting", rb_disable_event_waiting, 0);
-  rb_define_module_function(rb_mGraphics, "unfreeze", rb_disable_event_waiting, 0); // disable_event_waiting alias
+  rb_define_module_function(rb_mGraphics, "unfreeze", rb_disable_event_waiting, 0);  // disable_event_waiting alias
   rb_define_module_function(rb_mGraphics, "exit_key=", rb_set_exit_key, 1);
 
   rb_define_module_function(rb_mGraphics, "show_cursor", rb_show_cursor, 0);
@@ -228,22 +228,22 @@ extern "C" void Init_Graphics() {
   rb_define_module_function(rb_mGraphics, "cursor_on_screen?", rb_cursor_on_screen, 0);
 
   rb_define_module_function(rb_mGraphics, "target_fps=", rb_set_target_fps, 1);
-  rb_define_module_function(rb_mGraphics, "fps=", rb_set_target_fps, 1); // target_fps= alias
-  rb_define_module_function(rb_mGraphics, "frame_rate=", rb_set_target_fps, 1); // target_fps= alias
+  rb_define_module_function(rb_mGraphics, "fps=", rb_set_target_fps, 1);         // target_fps= alias
+  rb_define_module_function(rb_mGraphics, "frame_rate=", rb_set_target_fps, 1);  // target_fps= alias
   rb_define_module_function(rb_mGraphics, "frame_time", rb_get_frame_time, 0);
-  rb_define_module_function(rb_mGraphics, "delta_time", rb_get_frame_time, 0); // frame_time alias
-  rb_define_module_function(rb_mGraphics, "delta", rb_get_frame_time, 0);      // frame_time alias
+  rb_define_module_function(rb_mGraphics, "delta_time", rb_get_frame_time, 0);  // frame_time alias
+  rb_define_module_function(rb_mGraphics, "delta", rb_get_frame_time, 0);       // frame_time alias
   rb_define_module_function(rb_mGraphics, "time", rb_get_time, 0);
   rb_define_module_function(rb_mGraphics, "frame_count", rb_get_time, 0);  // time alias
   rb_define_module_function(rb_mGraphics, "fps", rb_get_fps, 0);
-  rb_define_module_function(rb_mGraphics, "frame_rate", rb_get_fps, 0); // fps alias
+  rb_define_module_function(rb_mGraphics, "frame_rate", rb_get_fps, 0);  // fps alias
 
   rb_define_module_function(rb_mGraphics, "draw_fps", rb_draw_fps, 2);
 
   rb_define_module_function(rb_mGraphics, "swap_screen_buffer", rb_swap_screen_buffer, 0);
   rb_define_module_function(rb_mGraphics, "poll_input_events", rb_poll_input_events, 0);
   rb_define_module_function(rb_mGraphics, "wait_time", rb_wait_time, 1);
-  rb_define_module_function(rb_mGraphics, "wait", rb_wait_time, 1); // wait_time alias
+  rb_define_module_function(rb_mGraphics, "wait", rb_wait_time, 1);  // wait_time alias
   rb_define_module_function(rb_mGraphics, "take_screenshot", rb_take_screenshot, 1);
   rb_define_module_function(rb_mGraphics, "config_flags=", rb_set_config_flags, 1);
   rb_define_module_function(rb_mGraphics, "open_url", rb_open_url, 1);

@@ -1,21 +1,19 @@
 #include "math/math_bindings.h"
-#include "ruby_values.h"
 #include "ruby_adapter.h"
+#include "ruby_values.h"
 
 // Binding to Clamp(float, float, float)
 RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(rb_math_clamp, Clamp)
 
-//Binding to Lerp(float, float, float)
+// Binding to Lerp(float, float, float)
 RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(rb_math_lerp, Lerp)
 
 // Binding to Normalize(float, float, float)
 RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(rb_math_normalize, Normalize)
 
 // Binding to Remap(float, float, float, float, float)
-static VALUE rb_math_remap(VALUE self, VALUE value, VALUE in_start, VALUE in_end, VALUE out_start,
-                           VALUE out_end) {
-  auto result = Remap(NUM2FLT(value), NUM2FLT(in_start), NUM2FLT(in_end),
-                       NUM2FLT(out_start), NUM2FLT(out_end));
+static VALUE rb_math_remap(VALUE self, VALUE value, VALUE in_start, VALUE in_end, VALUE out_start, VALUE out_end) {
+  auto result = Remap(NUM2FLT(value), NUM2FLT(in_start), NUM2FLT(in_end), NUM2FLT(out_start), NUM2FLT(out_end));
 
   return DBL2NUM(result);
 }

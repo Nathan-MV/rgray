@@ -54,6 +54,16 @@
 #   @param tint [Color]
 #   @return [void]
 
+# @!method unload
+#   Unload font from GPU memory (VRAM)
+#   @param font [void]
+#   @return [void]
+
+# @!method dispose
+#   Unload font from GPU memory (VRAM)
+#   @param font [void]
+#   @return [void]
+
 # @!method measure
 #   Set vertical line spacing when drawing with line-breaks
 #   @param spacing [Integer]

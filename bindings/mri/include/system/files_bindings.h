@@ -1,10 +1,7 @@
-#ifndef FILES_H
-#define FILES_H
+#pragma once
 
-#include "ruby_values.h"
-#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 // extern "C" void initializeFiles();
-
-#endif // FILES_H

@@ -1,4 +1,4 @@
-#include <graphics/color_bindings.h>
+#include "graphics/color_bindings.h"
 #include "ruby/internal/core/rdata.h"
 
 VALUE rb_cColor;
@@ -23,7 +23,7 @@ static auto rb_color_initialize(int argc, VALUE* argv, VALUE self) {
       if (RB_TYPE_P(arg, T_STRING) || RB_TYPE_P(arg, T_FIXNUM) || RB_TYPE_P(arg, T_BIGNUM)) {
         const auto* hex_str = StringValueCStr(argv[0]);
         color = ColorFromHex(hex_str);
-      // Handle specified Color object
+        // Handle specified Color object
       } else if (rb_obj_is_kind_of(arg, rb_cColor)) {
         color = *rb::get_safe<Color>(arg, rb_cColor);
       } else {
@@ -148,7 +148,7 @@ static auto rb_color_lerp(VALUE self, VALUE rb_other, VALUE rb_d) {
 }
 // RLAPI Color GetPixelColor(void *srcPtr, int format);                        // Get Color from a source pixel pointer of certain format
 static auto rb_get_pixel_color(VALUE self, VALUE rb_src_ptr, VALUE rb_format) {
-  auto* src_ptr = (void *)(uintptr_t)NUM2ULONG(rb_src_ptr);
+  auto* src_ptr = (void*)(uintptr_t)NUM2ULONG(rb_src_ptr);
   auto format = NUM2INT(rb_format);
 
   auto result = GetPixelColor(src_ptr, format);
@@ -157,7 +157,7 @@ static auto rb_get_pixel_color(VALUE self, VALUE rb_src_ptr, VALUE rb_format) {
 }
 // RLAPI void SetPixelColor(void *dstPtr, Color color, int format);            // Set color formatted into destination pixel pointer
 static auto rb_set_pixel_color(VALUE self, VALUE rb_dst_ptr, VALUE rb_color, VALUE rb_format) {
-  auto* dst_ptr = (void *)(uintptr_t)NUM2ULONG(rb_dst_ptr);
+  auto* dst_ptr = (void*)(uintptr_t)NUM2ULONG(rb_dst_ptr);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
   auto format = NUM2INT(rb_format);
 
@@ -191,21 +191,21 @@ extern "C" void Init_Color() {
   // Define initialize and attribute accessors (getters and setters)
   rb_define_method(rb_cColor, "initialize", rb_color_initialize, -1);
   rb_define_method(rb_cColor, "r", rb_color_get_red, 0);
-  rb_define_method(rb_cColor, "red", rb_color_get_red, 0); // r alias
+  rb_define_method(rb_cColor, "red", rb_color_get_red, 0);  // r alias
   rb_define_method(rb_cColor, "g", rb_color_get_green, 0);
-  rb_define_method(rb_cColor, "green", rb_color_get_green, 0); // g alias
+  rb_define_method(rb_cColor, "green", rb_color_get_green, 0);  // g alias
   rb_define_method(rb_cColor, "b", rb_color_get_blue, 0);
-  rb_define_method(rb_cColor, "blue", rb_color_get_blue, 0); // b alias
+  rb_define_method(rb_cColor, "blue", rb_color_get_blue, 0);  // b alias
   rb_define_method(rb_cColor, "a", rb_color_get_alpha, 0);
-  rb_define_method(rb_cColor, "alpha", rb_color_get_alpha, 0); // a alias
+  rb_define_method(rb_cColor, "alpha", rb_color_get_alpha, 0);  // a alias
   rb_define_method(rb_cColor, "r=", rb_color_set_red, 1);
-  rb_define_method(rb_cColor, "red=", rb_color_set_red, 1); // r= alias
+  rb_define_method(rb_cColor, "red=", rb_color_set_red, 1);  // r= alias
   rb_define_method(rb_cColor, "g=", rb_color_set_green, 1);
-  rb_define_method(rb_cColor, "green=", rb_color_set_green, 1); // g= alias
+  rb_define_method(rb_cColor, "green=", rb_color_set_green, 1);  // g= alias
   rb_define_method(rb_cColor, "b=", rb_color_set_blue, 1);
-  rb_define_method(rb_cColor, "blue=", rb_color_set_blue, 1); // b= alias
+  rb_define_method(rb_cColor, "blue=", rb_color_set_blue, 1);  // b= alias
   rb_define_method(rb_cColor, "a=", rb_color_set_alpha, 1);
-  rb_define_method(rb_cColor, "alpha=", rb_color_set_alpha, 1); // a= alias
+  rb_define_method(rb_cColor, "alpha=", rb_color_set_alpha, 1);  // a= alias
 
   // Define additional methods
   rb_define_method(rb_cColor, "eql?", rb_color_is_equal, 1);
@@ -217,7 +217,7 @@ extern "C" void Init_Color() {
   rb_define_method(rb_cColor, "brightness", rb_color_brightness, 1);
   rb_define_method(rb_cColor, "contrast", rb_color_contrast, 1);
   rb_define_method(rb_cColor, "alpha_blend", rb_color_alpha_blend, 2);
-  rb_define_method(rb_cColor, "blend", rb_color_alpha_blend, 2); // alpha_blend alias
+  rb_define_method(rb_cColor, "blend", rb_color_alpha_blend, 2);  // alpha_blend alias
   rb_define_method(rb_cColor, "lerp", rb_color_lerp, 2);
   rb_define_method(rb_cColor, "pixel_color", rb_get_pixel_color, 2);
   rb_define_method(rb_cColor, "set_pixel_color", rb_set_pixel_color, 3);

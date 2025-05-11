@@ -1,4 +1,4 @@
-#include <graphics/shader_bindings.h>
+#include "graphics/shader_bindings.h"
 #include <string.h>
 
 VALUE rb_cShader;
@@ -11,22 +11,18 @@ bool ends_with(const char* str, const char* suffix) {
 }
 
 // Check if a string looks like a shader filename (by extension)
-bool looks_like_shader_file(const char* str) {
-  return ends_with(str, ".vs") || ends_with(str, ".fs") ||
-         ends_with(str, ".vert") || ends_with(str, ".frag") ||
-         ends_with(str, ".glsl");
-}
+bool looks_like_shader_file(const char* str) { return ends_with(str, ".vs") || ends_with(str, ".fs") || ends_with(str, ".vert") || ends_with(str, ".frag") || ends_with(str, ".glsl"); }
 
 // // Shader management functions
 // // NOTE: Shader functionality is not available on OpenGL 1.1
 // RLAPI Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
 // RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
-static auto rb_shader_initialize(int argc, VALUE *argv, VALUE self) {
+static auto rb_shader_initialize(int argc, VALUE* argv, VALUE self) {
   auto& shader = rb::get<Shader>(self);
 
   if (argc == 2) {
-    const char *vs = nullptr;
-    const char *fs = nullptr;
+    const char* vs = nullptr;
+    const char* fs = nullptr;
 
     if (!NIL_P(argv[0])) vs = StringValueCStr(argv[0]);
     if (!NIL_P(argv[1])) fs = StringValueCStr(argv[1]);
@@ -112,8 +108,7 @@ static auto rb_unload_shader(VALUE self) {
   return self;
 }
 
-static auto rb_set_shader(VALUE self, VALUE rb_uniform_name, VALUE rb_value,
-                          VALUE rb_uniform_type) {
+static auto rb_set_shader(VALUE self, VALUE rb_uniform_name, VALUE rb_value, VALUE rb_uniform_type) {
   auto& shader = rb::get<Shader>(self);
   const auto* uniformName = StringValueCStr(rb_uniform_name);
   auto location = GetShaderLocation(shader, uniformName);
@@ -155,14 +150,14 @@ extern "C" void Init_Shader() {
   rb_define_alloc_func(rb_cShader, alloc_shader<Shader>);
 
   rb_define_method(rb_cShader, "initialize", rb_shader_initialize, -1);
-  rb_define_method(rb_cShader, "load", rb_shader_initialize, -1); // initialize alias
+  rb_define_method(rb_cShader, "load", rb_shader_initialize, -1);  // initialize alias
   rb_define_method(rb_cShader, "ready?", rb_is_shader_ready, 0);
   rb_define_method(rb_cShader, "location", rb_get_shader_location, 1);
   rb_define_method(rb_cShader, "location_attrib", rb_get_shader_location_attrib, 1);
   rb_define_method(rb_cShader, "set_value", rb_set_shader_value, 3);
-  rb_define_method(rb_cShader, "set_uniform", rb_set_shader_value, 3); // set_value alias
+  rb_define_method(rb_cShader, "set_uniform", rb_set_shader_value, 3);  // set_value alias
   rb_define_method(rb_cShader, "set_value_v", rb_set_shader_value_v, 4);
-  rb_define_method(rb_cShader, "set_uniform_v", rb_set_shader_value_v, 4); // set_value_v alias
+  rb_define_method(rb_cShader, "set_uniform_v", rb_set_shader_value_v, 4);  // set_value_v alias
   rb_define_method(rb_cShader, "set_texture", rb_set_shader_value_texture, 2);
   rb_define_method(rb_cShader, "unload", rb_unload_shader, 0);
   rb_define_method(rb_cShader, "dispose", rb_unload_shader, 0);  // unload alias

@@ -1,10 +1,7 @@
-#ifndef GESTURES_H
-#define GESTURES_H
+#pragma once
 
-#include "ruby_values.h"
-#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 extern "C" void Init_Gestures();
-
-#endif // GESTURES_H

@@ -1,4 +1,4 @@
-#include <main.h>
+#include "main.h"
 #include <array>
 #include <filesystem>
 #include <iostream>
@@ -28,6 +28,7 @@ extern "C" void Init_rgray(void) {
   // Classes
   Init_Color();
   Init_Rect();
+  Init_Circle();
   Init_Vec2();
   Init_Vec3();
   Init_Vec4();

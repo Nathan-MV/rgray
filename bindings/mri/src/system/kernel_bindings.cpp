@@ -1,4 +1,4 @@
-#include <system/kernel_bindings.h>
+#include "system/kernel_bindings.h"
 
 // Random values generation functions
 // RLAPI void SetRandomSeed(unsigned int seed);                      // Set the seed for the random number generator
@@ -27,8 +27,7 @@ static VALUE rb_load_csv(int argc, VALUE* argv, VALUE self) {
   VALUE ret = rb_ary_new();
 
   try {
-    rapidcsv::Document doc(std::string(csv_data, csv_length), rapidcsv::LabelParams(-1, -1),
-                           rapidcsv::SeparatorParams(',', false, true, true, true));
+    rapidcsv::Document doc(std::string(csv_data, csv_length), rapidcsv::LabelParams(-1, -1), rapidcsv::SeparatorParams(',', false, true, true, true));
     int row_count = doc.GetRowCount();
     int col_count = doc.GetColumnCount();
     rb_ary_resize(ret, row_count);

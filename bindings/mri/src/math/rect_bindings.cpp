@@ -1,8 +1,8 @@
-#include <math/rect_bindings.h>
+#include "math/rect_bindings.h"
 
 VALUE rb_cRect;
 
-static auto rb_rect_initialize(int argc, VALUE *argv, VALUE self) {
+static auto rb_rect_initialize(int argc, VALUE* argv, VALUE self) {
   auto& rect = rb::get<RayRectangle>(self);
 
   // Default values

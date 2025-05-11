@@ -1,4 +1,4 @@
-#include <math/vec4_bindings.h>
+#include "math/vec4_bindings.h"
 
 VALUE rb_cVec4;
 

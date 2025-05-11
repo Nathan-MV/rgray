@@ -1,11 +1,7 @@
-#ifndef RUBY_VALUES_H
-#define RUBY_VALUES_H
+#pragma once
 
 #include <type_traits>
 #include <typeinfo>
-#include "ruby.h"
-#include "ruby/encoding.h"
-#include "ruby/version.h"
 #include "graphics/bitmap_bindings.h"
 #include "graphics/color_bindings.h"
 #include "graphics/font_bindings.h"
@@ -16,6 +12,9 @@
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
+#include "ruby.h"
+#include "ruby/encoding.h"
+#include "ruby/version.h"
 
 template <class T> auto rb_object_free(void *ptr) { delete static_cast<T *>(ptr); }
 
@@ -65,7 +64,7 @@ static int *get_int_array(VALUE rb_array) {
   }
 #define RB_METHOD_RESULT_CONST(name, func, wrap) \
   static auto name(VALUE self) {                 \
-    const auto* res = func();                    \
+    const auto *res = func();                    \
     return wrap(res);                            \
   }
 
@@ -82,7 +81,7 @@ static int *get_int_array(VALUE rb_array) {
   }
 #define RB_METHOD_RESULT_CONST_ARG(name, func, wrap, conv) \
   static auto name(VALUE self, VALUE arg) {                \
-    const auto* res = func(conv(arg));                     \
+    const auto *res = func(conv(arg));                     \
     return wrap(res);                                      \
   }
 
@@ -137,57 +136,43 @@ static int *get_int_array(VALUE rb_array) {
 #define RB_METHOD_ARG_IMG(name, func, ret) RB_METHOD_ARG(name, func, ret, *get_image)
 #define RB_METHOD_INT_ARG(name, func) RB_METHOD_RESULT_ARG(name, func, INT2NUM, NUM2INT)
 #define RB_METHOD_INT_ARG_STR(name, func) RB_METHOD_RESULT_ARG(name, func, INT2NUM, StringValueCStr)
-#define RB_METHOD_CONST_STR_ARG_INT(name, func) \
-  RB_METHOD_RESULT_CONST_ARG(name, func, rb_str_new_cstr, NUM2INT)
+#define RB_METHOD_CONST_STR_ARG_INT(name, func) RB_METHOD_RESULT_CONST_ARG(name, func, rb_str_new_cstr, NUM2INT)
 
 // Specific two-argument macros
 #define RB_METHOD_ARG_INT_INT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, NUM2INT, NUM2INT)
-#define RB_METHOD_ARG_FLOAT_FLOAT(name, func, ret) \
-  RB_METHOD_ARG_2(name, func, ret, NUM2FLT, NUM2FLT)
+#define RB_METHOD_ARG_FLOAT_FLOAT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, NUM2FLT, NUM2FLT)
 #define RB_METHOD_ARG_IMG_INT(name, func, ret) RB_METHOD_ARG_2(name, func, ret, get_image, NUM2INT)
-#define RB_METHOD_INT_ARG_INT_INT(name, func) \
-  RB_METHOD_RESULT_ARG_2(name, func, INT2NUM, NUM2INT, NUM2INT)
-#define RB_METHOD_FLOAT_ARG_INT_INT(name, func) \
-  RB_METHOD_RESULT_ARG_2(name, func, DBL2NUM, NUM2INT, NUM2INT)
+#define RB_METHOD_INT_ARG_INT_INT(name, func) RB_METHOD_RESULT_ARG_2(name, func, INT2NUM, NUM2INT, NUM2INT)
+#define RB_METHOD_FLOAT_ARG_INT_INT(name, func) RB_METHOD_RESULT_ARG_2(name, func, DBL2NUM, NUM2INT, NUM2INT)
 
 // Specific three-argument macros
-#define RB_METHOD_ARG_INT_INT_INT(name, func, ret) \
-  RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, NUM2INT)
-#define RB_METHOD_ARG_INT_INT_STR(name, func, ret) \
-  RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, StringValueCStr)
-#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(name, func) \
-  RB_METHOD_RESULT_ARG_3(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT)
+#define RB_METHOD_ARG_INT_INT_INT(name, func, ret) RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, NUM2INT)
+#define RB_METHOD_ARG_INT_INT_STR(name, func, ret) RB_METHOD_ARG_3(name, func, ret, NUM2INT, NUM2INT, StringValueCStr)
+#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT(name, func) RB_METHOD_RESULT_ARG_3(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT)
 
 // Specific four-argument macro
-#define RB_METHOD_INT_FLOAT_FLOAT_FLOAT(name, func, ret) \
-  RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
-#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT_FLOAT(name, func) \
-  RB_METHOD_RESULT_ARG_4(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT, NUM2FLT)
-#define RB_METHOD_ARG_INT_FLOAT_FLOAT_FLOAT(name, func, ret) \
-  RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
+#define RB_METHOD_INT_FLOAT_FLOAT_FLOAT(name, func, ret) RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
+#define RB_METHOD_FLOAT_ARG_FLOAT_FLOAT_FLOAT_FLOAT(name, func) RB_METHOD_RESULT_ARG_4(name, func, DBL2NUM, NUM2FLT, NUM2FLT, NUM2FLT, NUM2FLT)
+#define RB_METHOD_ARG_INT_FLOAT_FLOAT_FLOAT(name, func, ret) RB_METHOD_ARG_4(name, func, ret, NUM2INT, NUM2FLT, NUM2FLT, NUM2FLT)
 
 // Boolean macros
 #define RB_METHOD_BOOL(name, func) \
   static auto name(VALUE self) { return func() ? Qtrue : Qfalse; }
 #define RB_METHOD_BOOL_ARG_INT(name, func) \
   static auto name(VALUE self, VALUE val) { return func(NUM2INT(val)) ? Qtrue : Qfalse; }
-#define RB_METHOD_BOOL_ARG_INT_INT(name, func)            \
-  static auto name(VALUE self, VALUE a, VALUE b) {        \
-    return func(NUM2INT(a), NUM2INT(b)) ? Qtrue : Qfalse; \
-  }
+#define RB_METHOD_BOOL_ARG_INT_INT(name, func) \
+  static auto name(VALUE self, VALUE a, VALUE b) { return func(NUM2INT(a), NUM2INT(b)) ? Qtrue : Qfalse; }
 #define RB_METHOD_BOOL_ARG_UINT(name, func) \
   static auto name(VALUE self, VALUE val) { return func(NUM2UINT(val)) ? Qtrue : Qfalse; }
 
 // Wrapper for vector objects (example for a Vector2 type)
-#define RB_METHOD_TO_VEC2(name, func)                                             \
-  static auto name(VALUE self) {                                               \
-    auto res = func();                                                         \
+#define RB_METHOD_TO_VEC2(name, func)              \
+  static auto name(VALUE self) {                   \
+    auto res = func();                             \
     return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
-#define RB_METHOD_VEC2_ARG_INT(name, func)                                     \
-  static auto name(VALUE self, VALUE val) {                                    \
-    auto res = func(NUM2INT(val));                                             \
+#define RB_METHOD_VEC2_ARG_INT(name, func)         \
+  static auto name(VALUE self, VALUE val) {        \
+    auto res = func(NUM2INT(val));                 \
     return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
-
-#endif  // RUBY_VALUES_H

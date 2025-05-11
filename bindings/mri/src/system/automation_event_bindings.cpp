@@ -1,4 +1,4 @@
-#include <system/automation_event_bindings.h>
+#include "system/automation_event_bindings.h"
 
 // Automation events functionality
 // RLAPI AutomationEventList LoadAutomationEventList(const char *fileName);                // Load automation events list from file, nullptr for empty list, capacity = MAX_AUTOMATION_EVENTS

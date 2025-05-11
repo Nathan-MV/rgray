@@ -1,4 +1,4 @@
-#include <input/keyboard_bindings.h>
+#include "input/keyboard_bindings.h"
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
@@ -29,12 +29,12 @@ extern "C" void Init_Keyboard() {
   VALUE rb_mKeyboard = rb_define_module("Keyboard");
 
   rb_define_module_function(rb_mKeyboard, "pressed?", rb_key_pressed, 1);
-	rb_define_module_function(rb_mKeyboard, "repeat?", rb_key_pressed_repeat, 1);
-	rb_define_module_function(rb_mKeyboard, "down?", rb_key_down, 1);
-	rb_define_module_function(rb_mKeyboard, "released?", rb_key_released, 1);
-	rb_define_module_function(rb_mKeyboard, "up?", rb_key_up, 1);
-	rb_define_module_function(rb_mKeyboard, "pressed", rb_get_key_pressed, 0);
-	rb_define_module_function(rb_mKeyboard, "char_pressed", rb_get_char_pressed, 0);
+  rb_define_module_function(rb_mKeyboard, "repeat?", rb_key_pressed_repeat, 1);
+  rb_define_module_function(rb_mKeyboard, "down?", rb_key_down, 1);
+  rb_define_module_function(rb_mKeyboard, "released?", rb_key_released, 1);
+  rb_define_module_function(rb_mKeyboard, "up?", rb_key_up, 1);
+  rb_define_module_function(rb_mKeyboard, "pressed", rb_get_key_pressed, 0);
+  rb_define_module_function(rb_mKeyboard, "char_pressed", rb_get_char_pressed, 0);
 
   rb_define_module_function(rb_mKeyboard, "clipboard_text=", rb_set_clipboard_text, 1);
   rb_define_module_function(rb_mKeyboard, "clipboard_text", rb_get_clipboard_text, 0);

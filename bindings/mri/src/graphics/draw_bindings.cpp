@@ -1,4 +1,4 @@
-#include <graphics/draw_bindings.h>
+#include "graphics/draw_bindings.h"
 
 // Drawing-related functions
 
@@ -18,8 +18,7 @@ static auto rb_begin_blend_mode(VALUE self, VALUE rb_mode) {
 }
 // RLAPI void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
 // RLAPI void EndScissorMode(void);                                  // End scissor mode
-static auto rb_begin_scissor_mode(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_width,
-                                  VALUE rb_height) {
+static auto rb_begin_scissor_mode(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_width, VALUE rb_height) {
   auto x = NUM2INT(rb_x);
   auto y = NUM2INT(rb_y);
   auto width = NUM2INT(rb_width);
@@ -50,6 +49,5 @@ extern "C" void Init_Draw(void) {
   VALUE rb_mDraw = rb_define_module("Draw");
 
   rb_define_module_function(rb_mDraw, "begin_blend_mode", rb_begin_blend_mode, 1);
-  rb_define_module_function(rb_mDraw, "begin_scissor_mode",
-                            rb_begin_scissor_mode, 4);
+  rb_define_module_function(rb_mDraw, "begin_scissor_mode", rb_begin_scissor_mode, 4);
 }

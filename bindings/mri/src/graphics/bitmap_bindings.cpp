@@ -1,4 +1,6 @@
-#include <graphics/bitmap_bindings.h>
+#include "graphics/bitmap_bindings.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 VALUE rb_cBitmap;
 
@@ -9,41 +11,45 @@ VALUE rb_cBitmap;
 // Image loading functions
 // NOTE: These functions do not require GPU access
 // RLAPI Image RayLoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)auto
-static auto rb_image_initialize(int argc, VALUE *argv, VALUE self) {
+static auto rb_image_initialize(int argc, VALUE* argv, VALUE self) {
   auto& img = rb::get<Image>(self);
 
-  if (argc == 1) {
-    // Handle String or Texture input
-    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cString))) {
-      const auto* name = StringValueCStr(argv[0]);
-      img = RayLoadImage(name);
-    } else if (RTEST(rb_obj_is_kind_of(argv[0], rb_cSprite))) {
-      auto* texture = rb::get_safe<Texture2D>(argv[0], rb_cSprite);
-      img = LoadImageFromTexture(*texture);
-    } else {
-      rb_raise(rb_eTypeError, "expected a String or Texture");
+  switch (argc) {
+    case 1: {
+      VALUE arg = argv[0];
+
+      if (RB_TYPE_P(arg, T_STRING)) {
+        const auto* name = StringValueCStr(argv[0]);
+        img = RayLoadImage(name);
+      } else if (rb_obj_is_kind_of(arg, rb_cSprite)) {
+        auto* texture = rb::get_safe<Texture2D>(arg, rb_cSprite);
+        img = LoadImageFromTexture(*texture);
+      } else {
+        rb_raise(rb_eTypeError, "expected a String or Texture");
+      }
+      break;
     }
-  } else if (argc == 2 || argc == 3) {
-    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cInteger))
-        && RTEST(rb_obj_is_kind_of(argv[1], rb_cInteger))) {
+
+    case 2:
+    case 3: {
+      if (!RB_INTEGER_TYPE_P(argv[0]) || !RB_INTEGER_TYPE_P(argv[1])) {
+        rb_raise(rb_eTypeError, "expected width and height as integers");
+      }
+
       const auto width = NUM2INT(argv[0]);
       const auto height = NUM2INT(argv[1]);
       Color color = {0, 0, 0, 0};
 
       if (argc == 3) {
-        if (RTEST(rb_obj_is_kind_of(argv[2], rb_cObject))) {
-          color = *rb::get_safe<Color>(argv[2], rb_cColor);
-        } else {
-          rb_raise(rb_eTypeError, "expected a color object as the third argument");
-        }
+        color = *rb::get_safe<Color>(argv[2], rb_cColor);
       }
 
       img = GenImageColor(width, height, color);
-    } else {
-      rb_raise(rb_eTypeError, "expected width and height as integers");
+      break;
     }
-  } else {
-    rb_raise(rb_eArgError, "wrong number of arguments (given %d, expected 1, 2, or 3)", argc);
+
+    default:
+      rb_raise(rb_eArgError, "wrong number of arguments (given %d, expected 1, 2, or 3)", argc);
   }
 
   return self;
@@ -64,49 +70,46 @@ static auto rb_load_image_raw(VALUE self, VALUE rb_file_name, VALUE rb_width, VA
 }
 // RLAPI Image LoadImageAnim(const char *fileName, int *frames);
 static auto rb_load_image_anim(VALUE self, VALUE rb_file_name, VALUE rb_frames) {
-    const char* fileName = StringValueCStr(rb_file_name);
+  const auto* fileName = StringValueCStr(rb_file_name);
 
-    // Prepare a temporary frame count variable
-    int frameCount = 0;
+  // Prepare a temporary frame count variable
+  auto frameCount = 0;
 
-    // Load image animation
-    auto& img = rb::get<Image>(self);
-    img = LoadImageAnim(fileName, &frameCount);
+  // Load image animation
+  auto& img = rb::get<Image>(self);
+  img = LoadImageAnim(fileName, &frameCount);
 
-    // Update the Ruby frame count (if passed in as an array with one element)
-    if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
-        rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
-    }
+  // Update the Ruby frame count (if passed in as an array with one element)
+  if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
+    rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
+  }
 
-    return self;
+  return self;
 }
 // RLAPI Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames);
-static auto rb_load_image_anim_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data,
-                                           VALUE rb_data_size, VALUE rb_frames) {
-    const auto* fileType = StringValueCStr(rb_file_type);
-    const unsigned char* fileData = reinterpret_cast<const unsigned char*>(RSTRING_PTR(rb_file_data));
-    int dataSize = NUM2INT(rb_data_size);
+static auto rb_load_image_anim_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data, VALUE rb_data_size, VALUE rb_frames) {
+  const auto* fileType = StringValueCStr(rb_file_type);
+  auto fileData = reinterpret_cast<const unsigned char*>(RSTRING_PTR(rb_file_data));
+  int dataSize = NUM2INT(rb_data_size);
 
-    // Temporary variable for frame count
-    int frameCount = 0;
+  // Temporary variable for frame count
+  int frameCount = 0;
 
-    // Load the image
-    auto& img = rb::get<Image>(self);
-    img = LoadImageAnimFromMemory(fileType, fileData, dataSize, &frameCount);
+  // Load the image
+  auto& img = rb::get<Image>(self);
+  img = LoadImageAnimFromMemory(fileType, fileData, dataSize, &frameCount);
 
-    // Update Ruby array with frame count
-    if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
-        rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
-    }
+  // Update Ruby array with frame count
+  if (RB_TYPE_P(rb_frames, T_ARRAY) && RARRAY_LEN(rb_frames) > 0) {
+    rb_ary_store(rb_frames, 0, INT2NUM(frameCount));
+  }
 
-    return self;
+  return self;
 }
 // RLAPI Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
-static auto rb_load_image_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data,
-                                      VALUE rb_data_size) {
+static auto rb_load_image_from_memory(VALUE self, VALUE rb_file_type, VALUE rb_file_data, VALUE rb_data_size) {
   auto* fileType = StringValueCStr(rb_file_type);
-  const unsigned char *fileData
-      = reinterpret_cast<const unsigned char *>(RSTRING_PTR(rb_file_data));
+  auto fileData = reinterpret_cast<const unsigned char*>(RSTRING_PTR(rb_file_data));
   auto dataSize = NUM2INT(rb_data_size);
 
   auto& img = rb::get<Image>(self);
@@ -128,7 +131,7 @@ static auto rb_load_image_from_texture(VALUE self, VALUE rb_texture) {
 static auto rb_is_image_ready(VALUE self) {
   auto& img = rb::get<Image>(self);
 
-  return IsImageValid(img)? Qtrue : Qfalse;
+  return IsImageValid(img) ? Qtrue : Qfalse;
 }
 // RLAPI Image LoadImageFromScreen(void);                                                                   // Load image from screen buffer and (screenshot)
 static auto rb_load_image_from_screen(VALUE self) {
@@ -167,9 +170,9 @@ static auto rb_gen_image_color(VALUE self, VALUE rb_width, VALUE rb_height, VALU
   auto height = NUM2INT(rb_height);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  img = GenImageColor(width, height, *color);
+  auto result = GenImageColor(width, height, *color);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end);        // Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
 static auto rb_gen_image_gradient_linear(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_direction, VALUE rb_start, VALUE rb_end) {
@@ -180,9 +183,9 @@ static auto rb_gen_image_gradient_linear(VALUE self, VALUE rb_width, VALUE rb_he
   auto* start = rb::get_safe<Color>(rb_start, rb_cColor);
   auto* end = rb::get_safe<Color>(rb_end, rb_cColor);
 
-  img = GenImageGradientLinear(width, height, direction, *start, *end);
+  auto result = GenImageGradientLinear(width, height, direction, *start, *end);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer);      // Generate image: radial gradient
 static auto rb_gen_image_gradient_radial(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_density, VALUE rb_inner, VALUE rb_outer) {
@@ -193,9 +196,9 @@ static auto rb_gen_image_gradient_radial(VALUE self, VALUE rb_width, VALUE rb_he
   auto* inner = rb::get_safe<Color>(rb_inner, rb_cColor);
   auto* outer = rb::get_safe<Color>(rb_outer, rb_cColor);
 
-  img = GenImageGradientRadial(width, height, density, *inner, *outer);
+  auto result = GenImageGradientRadial(width, height, density, *inner, *outer);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer);      // Generate image: square gradient
 static auto rb_gen_image_gradient_square(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_density, VALUE rb_inner, VALUE rb_outer) {
@@ -206,9 +209,9 @@ static auto rb_gen_image_gradient_square(VALUE self, VALUE rb_width, VALUE rb_he
   auto* inner = rb::get_safe<Color>(rb_inner, rb_cColor);
   auto* outer = rb::get_safe<Color>(rb_outer, rb_cColor);
 
-  img = GenImageGradientSquare(width, height, density, *inner, *outer);
+  auto result = GenImageGradientSquare(width, height, density, *inner, *outer);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2);    // Generate image: checked
 static auto rb_gen_image_checked(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_checks_x, VALUE rb_checks_y, VALUE rb_col1, VALUE rb_col2) {
@@ -220,9 +223,9 @@ static auto rb_gen_image_checked(VALUE self, VALUE rb_width, VALUE rb_height, VA
   auto* col1 = rb::get_safe<Color>(rb_col1, rb_cColor);
   auto* col2 = rb::get_safe<Color>(rb_col2, rb_cColor);
 
-  img = GenImageChecked(width, height, checks_x, checks_y, *col1, *col2);
+  auto result = GenImageChecked(width, height, checks_x, checks_y, *col1, *col2);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageWhiteNoise(int width, int height, float factor);                                     // Generate image: white noise
 static auto rb_gen_image_white_noise(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_factor) {
@@ -231,9 +234,9 @@ static auto rb_gen_image_white_noise(VALUE self, VALUE rb_width, VALUE rb_height
   auto height = NUM2INT(rb_height);
   auto factor = NUM2FLT(rb_factor);
 
-  img = GenImageWhiteNoise(width, height, factor);
+  auto result = GenImageWhiteNoise(width, height, factor);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale);           // Generate image: perlin noise
 static auto rb_gen_image_perlin_noise(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_offset_x, VALUE rb_offset_y, VALUE rb_scale) {
@@ -244,9 +247,9 @@ static auto rb_gen_image_perlin_noise(VALUE self, VALUE rb_width, VALUE rb_heigh
   auto offset_y = NUM2INT(rb_offset_y);
   auto scale = NUM2FLT(rb_scale);
 
-  img = GenImagePerlinNoise(width, height, offset_x, offset_y, scale);
+  auto result = GenImagePerlinNoise(width, height, offset_x, offset_y, scale);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageCellular(int width, int height, int tileSize);                                       // Generate image: cellular algorithm, bigger tileSize means bigger cells
 static auto rb_gen_image_cellular(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_tile_size) {
@@ -255,9 +258,9 @@ static auto rb_gen_image_cellular(VALUE self, VALUE rb_width, VALUE rb_height, V
   auto height = NUM2INT(rb_height);
   auto tile_size = NUM2INT(rb_tile_size);
 
-  img = GenImageCellular(width, height, tile_size);
+  auto result = GenImageCellular(width, height, tile_size);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image GenImageText(int width, int height, const char *text);                                       // Generate image: grayscale image from text data
 static auto rb_gen_image_text(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_text) {
@@ -266,9 +269,9 @@ static auto rb_gen_image_text(VALUE self, VALUE rb_width, VALUE rb_height, VALUE
   auto height = NUM2INT(rb_height);
   auto text = StringValueCStr(rb_text);
 
-  img = GenImageText(width, height, text);
+  auto result = GenImageText(width, height, text);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 
 // Image manipulation functions
@@ -276,27 +279,27 @@ static auto rb_gen_image_text(VALUE self, VALUE rb_width, VALUE rb_height, VALUE
 static auto rb_image_copy(VALUE self) {
   auto& img = rb::get<Image>(self);
 
-  img = ImageCopy(img);
+  auto result = ImageCopy(img);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image ImageFromImage(Image image, RayRectangle rec);                                                  // Create an image from another image piece
 static auto rb_image_from_image(VALUE self, VALUE rb_image, VALUE rb_rec) {
   auto& img = rb::get<Image>(self);
   auto* rec = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
 
-  img = ImageFromImage(img, *rec);
+  auto result = ImageFromImage(img, *rec);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image ImageFromChannel(Image image, int selectedChannel);                                          // Create an image from a selected channel of another image (GRAYSCALE)
 static auto rb_image_from_channel(VALUE self, VALUE rb_image, VALUE rb_selected_channel) {
   auto& img = rb::get<Image>(self);
   auto selected_channel = NUM2INT(rb_selected_channel);
 
-  img = ImageFromChannel(img, selected_channel);
+  auto result = ImageFromChannel(img, selected_channel);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image ImageText(const char *text, int fontSize, Color color);                                      // Create an image from text (default font)
 static auto rb_image_text_default(VALUE self, VALUE rb_text, VALUE rb_font_size, VALUE rb_color) {
@@ -304,21 +307,21 @@ static auto rb_image_text_default(VALUE self, VALUE rb_text, VALUE rb_font_size,
   auto font_size = NUM2INT(rb_font_size);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  img = ImageText(StringValueCStr(rb_text), font_size, *color);
+  auto result = ImageText(StringValueCStr(rb_text), font_size, *color);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Color tint);         // Create an image from text (custom sprite font)
 static auto rb_image_text_custom(VALUE self, VALUE rb_font, VALUE rb_text, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
-  auto* font = get_font(rb_font);
+  auto* font = rb::get_safe<Font>(rb_font, rb_cFont);
   auto font_size = NUM2FLT(rb_font_size);
   auto spacing = NUM2FLT(rb_spacing);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  img = ImageTextEx(*font, StringValueCStr(rb_text), font_size, spacing, *color);
+  auto result = ImageTextEx(*font, StringValueCStr(rb_text), font_size, spacing, *color);
 
-  return self;
+  return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
 // RLAPI void ImageFormat(Image *image, int newFormat);                                                     // Convert image data to desired format
 static auto rb_image_format(VALUE self, VALUE rb_new_format) {
@@ -369,7 +372,7 @@ static auto rb_image_alpha_clear(VALUE self, VALUE rb_color, VALUE rb_threshold)
 // RLAPI void ImageAlphaMask(Image *image, Image alphaMask);                                                // Apply alpha mask to image
 static auto rb_image_alpha_mask(VALUE self, VALUE rb_alpha_mask) {
   auto& img = rb::get<Image>(self);
-  auto* alpha_mask = get_image(rb_alpha_mask);
+  auto* alpha_mask = rb::get_safe<Image>(rb_alpha_mask, rb_cBitmap);
 
   ImageAlphaMask(&img, *alpha_mask);
 
@@ -394,31 +397,31 @@ static auto rb_image_blur_gaussian(VALUE self, VALUE rb_blur_size) {
 }
 // RLAPI void ImageKernelConvolution(Image *image, const float *kernel, int kernelSize);                    // Apply custom square convolution kernel to image
 static auto rb_image_kernel_convolution(VALUE self, VALUE rb_kernel, VALUE rb_kernel_size) {
-    // Get the image reference from Ruby object
-    auto& img = rb::get<Image>(self);
+  // Get the image reference from Ruby object
+  auto& img = rb::get<Image>(self);
 
-    // Validate and extract kernel size
-    Check_Type(rb_kernel, T_ARRAY);
-    int kernel_size = NUM2INT(rb_kernel_size);
-    int total_elements = kernel_size * kernel_size;
+  // Validate and extract kernel size
+  Check_Type(rb_kernel, T_ARRAY);
+  auto kernel_size = NUM2INT(rb_kernel_size);
+  auto total_elements = kernel_size * kernel_size;
 
-    if (RARRAY_LEN(rb_kernel) != total_elements) {
-        rb_raise(rb_eArgError, "Kernel array size must be kernel_size * kernel_size");
-    }
+  if (RARRAY_LEN(rb_kernel) != total_elements) {
+    rb_raise(rb_eArgError, "Kernel array size must be kernel_size * kernel_size");
+  }
 
-    // Use std::vector for safe memory management
-    std::vector<float> kernel;
-    kernel.reserve(total_elements);
+  // Use std::vector for safe memory management
+  std::vector<float> kernel;
+  kernel.reserve(total_elements);
 
-    for (int i = 0; i < total_elements; ++i) {
-        VALUE rb_elem = rb_ary_entry(rb_kernel, i);
-        kernel.push_back(NUM2FLT(rb_elem));
-    }
+  for (int i = 0; i < total_elements; ++i) {
+    auto rb_elem = rb_ary_entry(rb_kernel, i);
+    kernel.push_back(NUM2FLT(rb_elem));
+  }
 
-    // Apply the kernel
-    ImageKernelConvolution(&img, kernel.data(), kernel_size);
+  // Apply the kernel
+  ImageKernelConvolution(&img, kernel.data(), kernel_size);
 
-    return self;
+  return self;
 }
 // RLAPI void ImageResize(Image *image, int newWidth, int newHeight);                                       // Resize image (Bicubic scaling algorithm)
 static auto rb_image_resize(VALUE self, VALUE rb_new_width, VALUE rb_new_height) {
@@ -570,17 +573,19 @@ static auto rb_image_color_replace(VALUE self, VALUE rb_color, VALUE rb_replace)
 // RLAPI Color *LoadImageColors(Image image);                                                               // Load color data from image as a Color array (RGBA - 32bit)
 static auto rb_load_image_colors(VALUE self) {
   auto& img = rb::get<Image>(self);
-  Color *colors = LoadImageColors(img);
 
-  return Data_Wrap_Struct(rb_cColor, nullptr, rb_object_free<Color>, colors);
+  auto* color = LoadImageColors(img);
+
+  return rb::alloc_copy<Color>(rb_cColor, *color);
 }
 // RLAPI Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount);                         // Load colors palette from image as a Color array (RGBA - 32bit)
 static auto rb_load_image_palette(VALUE self, VALUE rb_max_palette_size) {
   auto& img = rb::get<Image>(self);
   auto max_palette_size = NUM2INT(rb_max_palette_size);
-  Color *colors = LoadImagePalette(img, max_palette_size, nullptr);
 
-  return Data_Wrap_Struct(rb_cColor, nullptr, rb_object_free<Color>, colors);
+  auto* color = LoadImagePalette(img, max_palette_size, nullptr);
+
+  return rb::alloc_copy<Color>(rb_cColor, *color);
 }
 // RLAPI void UnloadImageColors(Color *colors);                                                             // Unload color data loaded with LoadImageColors()
 static auto rb_unload_image_colors(VALUE self, VALUE rb_colors) {
@@ -613,7 +618,7 @@ static auto rb_get_image_color(VALUE self, VALUE rb_x, VALUE rb_y) {
   auto x = NUM2INT(rb_x);
   auto y = NUM2INT(rb_y);
 
-  Color result = GetImageColor(img, x, y);
+  auto result = GetImageColor(img, x, y);
 
   return Data_Wrap_Struct(rb_cColor, nullptr, rb_object_free<Color>, &result);
 }
@@ -816,8 +821,7 @@ static auto rb_image_draw_triangle_lines(VALUE self, VALUE rb_v1, VALUE rb_v2, V
   return self;
 }
 // RLAPI void ImageDrawTriangleFan(Image *dst, Vector2 *points, int pointCount, Color color);               // Draw a triangle fan defined by points within an image (first vertex is the center)
-static auto rb_image_draw_triangle_fan(VALUE self, VALUE rb_points, VALUE rb_point_count,
-                                        VALUE rb_color) {
+static auto rb_image_draw_triangle_fan(VALUE self, VALUE rb_points, VALUE rb_point_count, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
   auto* points = rb::get_safe<Vector2>(rb_points, rb_cVec2);
   auto point_count = NUM2INT(rb_point_count);
@@ -828,8 +832,7 @@ static auto rb_image_draw_triangle_fan(VALUE self, VALUE rb_points, VALUE rb_poi
   return self;
 }
 // RLAPI void ImageDrawTriangleStrip(Image *dst, Vector2 *points, int pointCount, Color color);             // Draw a triangle strip defined by points within an image
-static auto rb_image_draw_triangle_strip(VALUE self, VALUE rb_points, VALUE rb_point_count,
-                                        VALUE rb_color) {
+static auto rb_image_draw_triangle_strip(VALUE self, VALUE rb_points, VALUE rb_point_count, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
   auto* points = rb::get_safe<Vector2>(rb_points, rb_cVec2);
   auto point_count = NUM2INT(rb_point_count);
@@ -852,8 +855,7 @@ static auto rb_image_draw(VALUE self, VALUE rb_src, VALUE rb_src_rec, VALUE rb_d
   return self;
 }
 // RLAPI void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color);   // Draw text (using default font) within an image (destination)
-static auto rb_image_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos_y,
-                                VALUE rb_font_size, VALUE rb_color) {
+static auto rb_image_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos_y, VALUE rb_font_size, VALUE rb_color) {
   auto& dst = rb::get<Image>(self);
   const auto* text = StringValueCStr(rb_text);
   auto pos_x = NUM2INT(rb_pos_x);
@@ -866,10 +868,9 @@ static auto rb_image_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE 
   return self;
 }
 // RLAPI void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text (custom sprite font) within an image (destination)
-static auto rb_image_draw_text_ex(VALUE self, VALUE rb_dst, VALUE rb_font, VALUE rb_text, VALUE rb_position,
-                                    VALUE rb_font_size, VALUE rb_spacing, VALUE rb_tint) {
+static auto rb_image_draw_text_ex(VALUE self, VALUE rb_dst, VALUE rb_font, VALUE rb_text, VALUE rb_position, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_tint) {
   auto& dst = rb::get<Image>(self);
-  auto* font = get_font(rb_font);
+  auto* font = rb::get_safe<Font>(rb_font, rb_cFont);
   const auto* text = StringValueCStr(rb_text);
   auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
   auto font_size = NUM2FLT(rb_font_size);
@@ -926,7 +927,7 @@ extern "C" void Init_Bitmap() {
   rb_define_method(rb_cBitmap, "ready?", rb_is_image_ready, 0);
   rb_define_method(rb_cBitmap, "from_screen", rb_load_image_from_screen, 0);
   rb_define_method(rb_cBitmap, "unload", rb_unload_image, 0);
-  rb_define_method(rb_cBitmap, "dispose", rb_unload_image, 0); // unload alias
+  rb_define_method(rb_cBitmap, "dispose", rb_unload_image, 0);  // unload alias
   rb_define_method(rb_cBitmap, "export", rb_export_image, 1);
   rb_define_method(rb_cBitmap, "gen_color", rb_gen_image_color, 3);
   rb_define_method(rb_cBitmap, "gen_gradient_linear", rb_gen_image_gradient_linear, 5);

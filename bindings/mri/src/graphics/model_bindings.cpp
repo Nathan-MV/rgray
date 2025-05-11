@@ -1,4 +1,4 @@
-#include <graphics/model_bindings.h>
+#include "graphics/model_bindings.h"
 
 //------------------------------------------------------------------------------------
 // Model 3d Loading and Drawing Functions (Module: models)
@@ -30,7 +30,6 @@
 // RLAPI void UnloadModelAnimations(ModelAnimation *animations, int animCount);                // Unload animation array data
 // RLAPI bool IsModelAnimationValid(Model model, ModelAnimation anim);                         // Check model animation skeleton match
 // RLAPI void UpdateModelAnimationBoneMatrices(Model model, ModelAnimation anim, int frame);   // Update model animation mesh bone matrices
-
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)

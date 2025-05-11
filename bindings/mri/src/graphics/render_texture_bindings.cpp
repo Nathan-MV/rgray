@@ -1,4 +1,4 @@
-#include <graphics/render_texture_bindings.h>
+#include "graphics/render_texture_bindings.h"
 
 VALUE rb_cRenderTexture;
 

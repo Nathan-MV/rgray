@@ -1,4 +1,4 @@
-#include <audio/music_bindings.h>
+#include "audio/music_bindings.h"
 
 // Music management functions
 // RLAPI Music LoadMusicStream(const char *fileName);                    // Load music stream from file
@@ -19,5 +19,5 @@
 // RLAPI float GetMusicTimePlayed(Music music);                          // Get current music time played (in seconds)
 
 extern "C" void Init_Music() {
-  //VALUE rb_mMusic = rb_define_module("Music");
+  // VALUE rb_mMusic = rb_define_module("Music");
 }

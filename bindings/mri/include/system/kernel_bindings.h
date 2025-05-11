@@ -1,16 +1,13 @@
-#ifndef MRI_KERNEL_H
-#define MRI_KERNEL_H
+#pragma once
 
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "ruby_values.h"
-#include "ruby_adapter.h"
 #include "rapidcsv.h"
 #include "rgray/raylib_values.h"
 #include "rgray/system/kernel.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 extern "C" void Init_Kernel();
-
-#endif // MRI_KERNEL_H

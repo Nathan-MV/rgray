@@ -1,4 +1,4 @@
-#include <input/vr_bindings.h>
+#include "input/vr_bindings.h"
 
 // RLAPI void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
 // RLAPI void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)

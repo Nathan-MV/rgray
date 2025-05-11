@@ -1,4 +1,4 @@
-#include <graphics/shapes_bindings.h>
+#include "graphics/shapes_bindings.h"
 
 //------------------------------------------------------------------------------------
 // Basic Shapes Drawing Functions (Module: shapes)
@@ -11,6 +11,5 @@
 // RLAPI RayRectangle GetShapesTextureRectangle(void);                        // Get texture source rectangle that is used for shapes drawing
 
 extern "C" void Init_Shapes(void) {
-  //VALUE rb_mShapes = rb_define_module("Shapes");
-
+  // VALUE rb_mShapes = rb_define_module("Shapes");
 }

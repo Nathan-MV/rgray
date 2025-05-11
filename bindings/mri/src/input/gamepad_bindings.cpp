@@ -1,4 +1,4 @@
-#include <input/gamepad_bindings.h>
+#include "input/gamepad_bindings.h"
 
 // Input-related functions: gamepads
 // RLAPI bool IsGamepadAvailable(int gamepad);                                        // Check if a gamepad is available

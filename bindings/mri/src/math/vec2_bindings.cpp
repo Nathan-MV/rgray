@@ -1,9 +1,9 @@
-#include <math/vec2_bindings.h>
+#include "math/vec2_bindings.h"
 #include <tuple>
 
 VALUE rb_cVec2;
 
-static auto rb_vec2_initialize(int argc, VALUE *argv, VALUE self) {
+static auto rb_vec2_initialize(int argc, VALUE* argv, VALUE self) {
   auto& vec2 = rb::get<Vector2>(self);
 
   // Default values
@@ -74,7 +74,7 @@ static auto rb_vec2_move_towards(VALUE self, VALUE target, VALUE max_distance) {
 
 RB_METHOD_VEC2(rb_vec2_invert, Vector2Invert)
 
-static auto rb_vec2_clamp(int argc, VALUE *argv, VALUE self) {
+static auto rb_vec2_clamp(int argc, VALUE* argv, VALUE self) {
   auto& vec2 = rb::get<Vector2>(self);
 
   if (argc == 1) {
@@ -83,10 +83,7 @@ static auto rb_vec2_clamp(int argc, VALUE *argv, VALUE self) {
     if (rb_obj_is_kind_of(arg, rb_cVec2)) {
       auto* clamp_vec = rb::get_safe<Vector2>(arg, rb_cVec2);
 
-      Vector2 result = {
-          std::clamp(vec2.x, 0.0F, clamp_vec->x),
-          std::clamp(vec2.y, 0.0F, clamp_vec->y)
-      };
+      Vector2 result = {std::clamp(vec2.x, 0.0F, clamp_vec->x), std::clamp(vec2.y, 0.0F, clamp_vec->y)};
       vec2 = result;
     } else {
       rb_raise(rb_eArgError, "Invalid argument type");
@@ -148,7 +145,7 @@ static auto rb_vec2_screen_bounds(VALUE self, VALUE size_val) {
   return Qfalse;
 }
 
-static auto rb_random_movement(int argc, VALUE *argv, VALUE self) {
+static auto rb_random_movement(int argc, VALUE* argv, VALUE self) {
   auto& position = rb::get<Vector2>(self);
   VALUE direction_sym = Qnil, speed;
   rb_scan_args(argc, argv, "11", &speed, &direction_sym);

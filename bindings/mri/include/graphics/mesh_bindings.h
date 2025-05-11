@@ -1,10 +1,7 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
-#include "ruby_values.h"
-#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 // extern "C" void Init_Mesh();
-
-#endif // MESH_H

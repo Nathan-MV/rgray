@@ -5,9 +5,7 @@
 #include "raymath.h"
 #include "rgray/system/kernel.h"
 
-Vector2 Vector2DivideValue(Vector2 vector, float divisor) {
-  return {vector.x / divisor, vector.y / divisor};
-}
+Vector2 Vector2DivideValue(Vector2 vector, float divisor) { return {vector.x / divisor, vector.y / divisor}; }
 
 Vector2 Vector2RandomMovement(Vector2 &position, float speed, const std::string &direction) {
   Vector2 randomDirection = {GetRandomFloat(-1.0F, 1.0F), GetRandomFloat(-1.0F, 1.0F)};

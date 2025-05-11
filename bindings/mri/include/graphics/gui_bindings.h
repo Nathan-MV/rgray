@@ -1,12 +1,9 @@
-#ifndef GUI_H
-#define GUI_H
+#pragma once
 
-#include "ruby_values.h"
-#include "ruby_adapter.h"
-#include "rgray/raylib_values.h"
 #include <memory>
 #include <vector>
+#include "rgray/raylib_values.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
 extern "C" void Init_Gui();
-
-#endif // GUI_H

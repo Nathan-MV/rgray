@@ -1,4 +1,4 @@
-#include <graphics/sprite_bindings.h>
+#include "graphics/sprite_bindings.h"
 #include "ruby/internal/intern/object.h"
 
 VALUE rb_cSprite;
@@ -6,7 +6,7 @@ VALUE rb_cSprite;
 // Load texture from file into GPU memory (VRAM)
 // RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
 // RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
-static auto rb_texture_initialize(int argc, VALUE *argv, VALUE self) {
+static auto rb_texture_initialize(int argc, VALUE* argv, VALUE self) {
   auto& texture = rb::get<Texture2D>(self);
 
   if (argc == 1) {
@@ -20,8 +20,7 @@ static auto rb_texture_initialize(int argc, VALUE *argv, VALUE self) {
       rb_raise(rb_eTypeError, "expected a String or Image");
     }
   } else if (argc == 2) {
-    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cBitmap))
-        && RTEST(rb_obj_is_kind_of(argv[1], rb_cInteger))) {
+    if (RTEST(rb_obj_is_kind_of(argv[0], rb_cBitmap)) && RTEST(rb_obj_is_kind_of(argv[1], rb_cInteger))) {
       auto* img = rb::get_safe<Image>(argv[0], rb_cBitmap);
       const auto layout = NUM2INT(argv[1]);
 
@@ -29,7 +28,7 @@ static auto rb_texture_initialize(int argc, VALUE *argv, VALUE self) {
     } else {
       rb_raise(rb_eTypeError, "expected image and layout");
     }
-  } //else {
+  }  // else {
   //  rb_raise(rb_eArgError, "wrong number of arguments (given %d, expected 1 or 2 arguments)", argc);
   //}
 
@@ -45,12 +44,12 @@ RB_METHOD_TEXTURE_GETTER_INT(rb_texture_format, format)
 // NOTE: These functions require GPU access
 // RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
 static auto rb_load_texture_from_image(VALUE self, VALUE rb_image) {
-    auto& texture = rb::get<Texture2D>(self);
-    auto* img = rb::get_safe<Image>(rb_image, rb_cBitmap);
+  auto& texture = rb::get<Texture2D>(self);
+  auto* img = rb::get_safe<Image>(rb_image, rb_cBitmap);
 
-    texture = LoadTextureFromImage(*img);
+  texture = LoadTextureFromImage(*img);
 
-    return self;
+  return self;
 }
 // RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
 static auto rb_load_texture_cubemap(VALUE self, VALUE rb_image, VALUE rb_layout) {
@@ -67,7 +66,7 @@ static auto rb_load_texture_cubemap(VALUE self, VALUE rb_image, VALUE rb_layout)
 static auto rb_is_texture_ready(VALUE self) {
   auto& texture = rb::get<Texture2D>(self);
 
-  return IsTextureValid(texture)? Qtrue : Qfalse;
+  return IsTextureValid(texture) ? Qtrue : Qfalse;
 }
 // Unload texture from GPU memory (VRAM)
 static auto rb_unload_texture(VALUE self) {
@@ -149,7 +148,7 @@ static auto rb_draw_texture_v(VALUE self, VALUE rb_position, VALUE rb_tint) {
   return self;
 }
 // RLAPI void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);  // Draw a Texture2D with extended parameters
-static auto rb_draw_texture_ex(int argc, VALUE *argv, VALUE self) {
+static auto rb_draw_texture_ex(int argc, VALUE* argv, VALUE self) {
   VALUE rb_position, rb_rotation, rb_tint;
 
   rb_scan_args(argc, argv, "03", &rb_position, &rb_rotation, &rb_tint);
@@ -165,7 +164,7 @@ static auto rb_draw_texture_ex(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 // Draw a part of a texture defined by a rectangle
-static auto rb_draw_texture_rec(int argc, VALUE *argv, VALUE self) {
+static auto rb_draw_texture_rec(int argc, VALUE* argv, VALUE self) {
   VALUE rb_source, rb_position, rb_tint;
 
   rb_scan_args(argc, argv, "21", &rb_source, &rb_position, &rb_tint);
@@ -180,16 +179,14 @@ static auto rb_draw_texture_rec(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 // Draw a part of a texture defined by a rectangle with 'pro' parameters
-static auto rb_draw_texture_pro(int argc, VALUE *argv, VALUE self) {
+static auto rb_draw_texture_pro(int argc, VALUE* argv, VALUE self) {
   VALUE rb_source, rb_dest, rb_origin, rb_rotation, rb_tint;
 
   rb_scan_args(argc, argv, "14", &rb_source, &rb_dest, &rb_origin, &rb_rotation, &rb_tint);
 
   auto& texture = rb::get<Texture2D>(self);
   auto* source = rb::get_safe<RayRectangle>(rb_source, rb_cRect);
-  auto dst = !NIL_P(rb_dest)
-                 ? *rb::get_safe<RayRectangle>(rb_dest, rb_cRect)
-                 : (RayRectangle){source->x, source->y, fabsf(source->width), fabsf(source->height)};
+  auto dst = !NIL_P(rb_dest) ? *rb::get_safe<RayRectangle>(rb_dest, rb_cRect) : (RayRectangle){source->x, source->y, fabsf(source->width), fabsf(source->height)};
   auto origin = !NIL_P(rb_origin) ? *rb::get_safe<Vector2>(rb_origin, rb_cVec2) : Vector2{0.0F, 0.0F};
   auto rotation = NIL_P(rb_rotation) ? 0.0 : NUM2FLT(rb_rotation);
   auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
@@ -283,7 +280,7 @@ extern "C" void Init_Sprite() {
   rb_define_method(rb_cSprite, "load_cubemap", rb_load_texture_cubemap, 2);
   rb_define_method(rb_cSprite, "ready?", rb_is_texture_ready, 0);
   rb_define_method(rb_cSprite, "unload", rb_unload_texture, 0);
-  rb_define_method(rb_cSprite, "dispose", rb_unload_texture, 0); // unload alias
+  rb_define_method(rb_cSprite, "dispose", rb_unload_texture, 0);  // unload alias
   rb_define_method(rb_cSprite, "update", rb_update_texture, 1);
   rb_define_method(rb_cSprite, "update_rect", rb_update_texture_rec, 2);
   rb_define_method(rb_cSprite, "gen_mipmaps", rb_gen_texture_mipmaps, 0);

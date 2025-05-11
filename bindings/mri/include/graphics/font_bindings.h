@@ -1,35 +1,20 @@
-#ifndef TEXT_H
-#define TEXT_H
+#pragma once
 
-#include "ruby_values.h"
-#include "ruby_adapter.h"
 #include "rgray/raylib_values.h"
+#include "ruby_adapter.h"
+#include "ruby_values.h"
 
+extern VALUE rb_cFont;
 extern "C" void Init_Font();
 
-inline Font* get_font(VALUE obj) {
-  Font *font;
-  Data_Get_Struct(obj, Font, font);
-
-  return font;
+// Free the Font object
+// This function is called when the Ruby object is garbage collected
+template <class T> void free_font(void* data) {
+  T* ptr = reinterpret_cast<T*>(data);
+  UnloadFont(*ptr);
+  delete ptr;
 }
 
-template <typename T>
-void rb_font_free(void *ptr) {
-  T *obj = static_cast<T *>(ptr);
-  UnloadFont(*obj);
-  delete obj;
-}
-
-template <typename T>
-VALUE rb_font_alloc(VALUE klass) {
-  try {
-    T *obj = new T();
-    return Data_Wrap_Struct(klass, nullptr, rb_font_free<T>, obj);
-  } catch (const std::bad_alloc& e) {
-    rb_raise(rb_eNoMemError, "Failed to allocate memory for %s.", typeid(T).name());
-    return Qnil;
-  }
-}
-
-#endif // TEXT_H
+// Allocates and wraps a new instance of Font
+// This function is called when the Ruby object is created
+template <class T> VALUE alloc_font(VALUE klass) { return Data_Wrap_Struct(klass, nullptr, free_font<T>, new T()); }
