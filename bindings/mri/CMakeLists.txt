@@ -89,7 +89,9 @@ function(setup_library target)
   target_compile_features(${target} PUBLIC cxx_std_23)
 
   target_compile_options(${target}
-    PRIVATE ${COMMON_COMPILE_OPTIONS}
+    PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+    -Wno-cpp
   )
 
   set_target_properties(
