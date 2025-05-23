@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release]
 
     steps:
@@ -51,26 +51,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake ninja-build gcc g++ git ruby-full libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
 
+      # macOS-specific setup
+      - name: Install Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install cmake ninja ruby raylib
+
       # Caching CPM modules
       - uses: actions/cache@v4
         with:
           path: "**/cpm_modules"
           key: ${{ matrix.os }}-${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
 
-      # Build the project on Windows
-      - name: Build Project (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
+      # Build the project
+      - name: Build Project
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
-
-      # Build the project on Linux
-      - name: Build Project (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
+          cmake --build build -j$(sysctl -n hw.ncpu || nproc) --config ${{ matrix.build_type }}
 
       # Upload build artifacts
       - name: Upload Artifact
