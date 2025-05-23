@@ -3,15 +3,10 @@ name: Build
 on:
   workflow_dispatch:
   push:
-    tags:
-      - '*'
-    branches:
-      - master
-      - main
+    tags: ['*']
+    branches: [master, main]
   pull_request:
-    branches:
-      - master
-      - main
+    branches: [master, main]
 
 env:
   CPM_SOURCE_CACHE: ${{ github.workspace }}/cpm_modules
@@ -29,8 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Windows-specific setup (MSYS2)
-      - name: Set up MSYS2 (Windows)
+      - name: OS-specific Setup
         if: matrix.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
         with:
@@ -43,40 +37,41 @@ jobs:
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-ruby
             mingw-w64-ucrt-x86_64-raylib
+            mingw-w64-ucrt-x86_64-ccache
+            mingw-w64-ucrt-x86_64-clang-tools-extra
+            mingw-w64-ucrt-x86_64-cppcheck
             git
 
-      # Linux-specific setup
-      - name: Install Dependencies (Linux)
+      - name: OS-specific Setup
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build gcc g++ git ruby-full libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+          sudo apt-get install -y \
+            build-essential cmake ninja-build gcc g++ git ruby-full \
+            libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
+            libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
 
-      # macOS-specific setup
-      - name: Install Dependencies (macOS)
+      - name: OS-specific Setup
         if: matrix.os == 'macos-latest'
         run: |
           brew update
           brew install cmake ninja ruby raylib
 
-      # Caching CPM modules
-      - uses: actions/cache@v4
+      - name: Cache CPM Modules
+        uses: actions/cache@v4
         with:
           path: "**/cpm_modules"
-          key: ${{ matrix.os }}-${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
+          key: ${{ matrix.os }}-${{ github.workflow }}-cpm-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
 
-      # Build the project
       - name: Build Project
-        shell: bash
+        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
         run: |
           CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           cmake --build build --config ${{ matrix.build_type }} -- -j $CORES
 
-      # Upload build artifacts
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: "${{ matrix.os }}-artifact-${{ matrix.build_type }}"
-          path: |
-            ${{ github.workspace }}/build/out
+          path: ${{ github.workspace }}/build/out
