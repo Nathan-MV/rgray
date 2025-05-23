@@ -86,6 +86,17 @@ namespace rb {
     return result;
   }
 
+  template <typename T, auto Member, auto ToRuby> VALUE getter(VALUE self) {
+    auto& obj = get<T>(self);
+    return ToRuby(obj.*Member);
+  }
+
+  template <typename T, auto Member, auto FromRuby> VALUE setter(VALUE self, VALUE value) {
+    auto& obj = get<T>(self);
+    obj.*Member = FromRuby(value);
+    return self;
+  }
+
   template <class T> void free(void* data) { delete reinterpret_cast<T*>(data); }
 
   template <class T> void mark(T* data) {}
