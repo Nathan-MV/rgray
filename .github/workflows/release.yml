@@ -63,8 +63,15 @@ jobs:
           path: "**/cpm_modules"
           key: ${{ matrix.os }}-${{ github.workflow }}-cpm-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/CMakePresets.json') }}
 
-      - name: Build Project
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+      - name: Build Project (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
+
+      - name: Build Project (Linux/MacOS)
+        shell: bash
         run: |
           CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
