@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         build_type: [Release]
 
     steps:
@@ -55,7 +55,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install cmake ninja ruby raylib
+          brew install cmake ninja ruby raylib ccache cppcheck llvm clang-format
 
       - name: Cache CPM Modules
         uses: actions/cache@v4
@@ -70,13 +70,19 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
-      - name: Build Project (Linux/MacOS)
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      - name: Build Project (Linux)
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
-          CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build --config ${{ matrix.build_type }} -- -j $CORES
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
+
+      - name: Build Project (macOS)
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(sysctl -n hw.ncpu) --config ${{ matrix.build_type }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
