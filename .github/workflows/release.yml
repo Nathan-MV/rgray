@@ -67,9 +67,11 @@ jobs:
 
       # Build the project
       - name: Build Project
+        shell: bash
         run: |
+          CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
           cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build -j$(sysctl -n hw.ncpu || nproc) --config ${{ matrix.build_type }}
+          cmake --build build --config ${{ matrix.build_type }} -- -j $CORES
 
       # Upload build artifacts
       - name: Upload Artifact
