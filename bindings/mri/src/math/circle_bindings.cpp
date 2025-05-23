@@ -1,4 +1,6 @@
 #include "math/circle_bindings.h"
+#include <raylib.h>
+#include "ruby_adapter.h"
 
 VALUE rb_cCircle;
 
@@ -12,6 +14,25 @@ static VALUE rb_circle_initialize(VALUE self, VALUE rb_center, VALUE rb_radius) 
 
   return self;
 }
+
+static VALUE rb_get_center(VALUE self) {
+  auto& circle = rb::get<Circle>(self);
+
+  return rb::alloc_borrowed<Vector2>(rb_cVec2, &circle.center);
+}
+
+static VALUE rb_set_center(VALUE self, VALUE value) {
+  auto& circle = rb::get<Circle>(self);
+  auto* center = rb::get_safe<Vector2>(value, rb_cVec2);
+
+  circle.center = *center;
+
+  return self;
+}
+
+static VALUE rb_get_radius(VALUE self) { return rb::getter<Circle, &Circle::radius, DBL2NUM>(self); }
+
+static VALUE rb_set_radius(VALUE self, VALUE value) { return rb::setter<Circle, &Circle::radius, NUM2DBL>(self, value); }
 
 // RLAPI void DrawCircle(int centerX, int centerY, float radius, Color color);                              // Draw a color-filled circle
 
@@ -123,10 +144,10 @@ extern "C" void Init_Circle() {
   rb_define_alloc_func(rb_cCircle, rb::alloc<Circle>);
 
   rb_define_method(rb_cCircle, "initialize", rb_circle_initialize, 2);
-  // rb_define_method(rb_cCircle, "center", rb::get<Circle>, 0);
-  // rb_define_method(rb_cCircle, "radius", rb::get<Circle>, 0);
-  // rb_define_method(rb_cCircle, "center=", rb::set<Circle>, 1);
-  // rb_define_method(rb_cCircle, "radius=", rb::set<Circle>, 1);
+  rb_define_method(rb_cCircle, "center", rb_get_center, 0);
+  rb_define_method(rb_cCircle, "center=", rb_set_center, 1);
+  rb_define_method(rb_cCircle, "radius", rb_get_radius, 0);
+  rb_define_method(rb_cCircle, "radius=", rb_set_radius, 1);
 
   rb_define_method(rb_cCircle, "draw_sector", rb_draw_circle_sector, 4);
   rb_define_method(rb_cCircle, "draw_sector_lines", rb_draw_circle_sector_lines, 4);

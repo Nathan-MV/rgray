@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include "rgray/raylib_values.h"
-#include "ruby.h"
+#include <ruby.h>
 
 extern VALUE rb_cBitmap;
 extern "C" void Init_Bitmap();

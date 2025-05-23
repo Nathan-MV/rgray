@@ -12,7 +12,7 @@
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
-#include "ruby.h"
+#include <ruby.h>
 #include "ruby/encoding.h"
 #include "ruby/version.h"
 

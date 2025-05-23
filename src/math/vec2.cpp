@@ -1,7 +1,7 @@
 #include "rgray/math/vec2.h"
 #include <cstdio>
 #include <string>
-#include "raylib.h"
+#include <raylib.h>
 #include "raymath.h"
 #include "rgray/system/kernel.h"
 
@@ -20,9 +20,9 @@ Vector2 Vector2RandomMovement(Vector2 &position, float speed, const std::string 
     randomDirection.x = GetRandomFloat(-1.0F, 0.0F);
   }
 
-  const Vector2 velocity = Vector2Scale(randomDirection, speed);
-  const Vector2 deltaVelocity = Vector2Scale(velocity, GetFrameTime());
-  Vector2 newPosition = Vector2Add(position, deltaVelocity);
+  auto velocity = Vector2Scale(randomDirection, speed);
+  auto deltaVelocity = Vector2Scale(velocity, GetFrameTime());
+  auto newPosition = Vector2Add(position, deltaVelocity);
 
   newPosition.x = Clamp(newPosition.x, 0.0F, static_cast<float>(GetScreenWidth()));
   newPosition.y = Clamp(newPosition.y, 0.0F, static_cast<float>(GetScreenHeight()));

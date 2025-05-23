@@ -1,9 +1,6 @@
-#ifndef COLOR_H
-#define COLOR_H
+#pragma once
 
 #include "rgray/raylib_values.h"
 
 Color ColorFromHex(const char *hex_arg);
 float ColorGetLuminance(Color color);
-
-#endif  // COLOR_H

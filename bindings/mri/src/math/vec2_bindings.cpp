@@ -168,7 +168,7 @@ static auto rb_random_movement(int argc, VALUE* argv, VALUE self) {
     }
   }
 
-  Vector2RandomMovement(position, speed_value, direction);
+  position = Vector2RandomMovement(position, speed_value, direction);
 
   return self;
 }

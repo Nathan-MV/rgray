@@ -1,4 +1,5 @@
 #include "input/gestures_bindings.h"
+#include <ruby.h>
 
 //------------------------------------------------------------------------------------
 // Gestures and Touch Handling Functions (Module: rgestures)

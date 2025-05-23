@@ -1,4 +1,5 @@
 #include "system/kernel_bindings.h"
+#include <ruby.h>
 
 // Random values generation functions
 // RLAPI void SetRandomSeed(unsigned int seed);                      // Set the seed for the random number generator

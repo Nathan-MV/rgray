@@ -1,6 +1,18 @@
 # @!method initialize
 #   @return [void]
 
+# @!method center
+#   @return [void]
+
+# @!method center=
+#   @return [void]
+
+# @!method radius
+#   @return [void]
+
+# @!method radius=
+#   @return [void]
+
 # @!method draw_sector
 #   Draw a piece of a circle
 #   @param center [Vec2]

@@ -1,4 +1,5 @@
 #include "input/keyboard_bindings.h"
+#include <ruby.h>
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)

@@ -1,6 +1,3 @@
-#ifndef KERNEL_H
-#define KERNEL_H
+#pragma once
 
 float GetRandomFloat(float min, float max);
-
-#endif  // KERNEL_H

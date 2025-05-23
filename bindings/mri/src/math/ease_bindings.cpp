@@ -1,4 +1,5 @@
 #include "math/ease_bindings.h"
+#include <ruby.h>
 
 RB_METHOD_EASE(rb_ease_linear, EaseLinear)
 RB_METHOD_EASE(rb_ease_sine, EaseSine)

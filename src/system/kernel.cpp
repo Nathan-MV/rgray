@@ -1,6 +1,6 @@
 #include "rgray/system/kernel.h"
 #include <cstdlib>
-#include "raylib.h"
+#include <raylib.h>
 
 // Get a random float between min and max included
 float GetRandomFloat(float min, float max) {
