@@ -55,9 +55,7 @@ function(setup_library target)
     list(APPEND LINK_LIBS X11 Xrandr Xinerama Xi Xxf86vm Xcursor)
   endif()
 
-  target_link_libraries(${target} 
-    myproject_options
-    #myproject_warnings
+  target_link_libraries(${target}
     rapidcsv raylib raygui reasings
     ${LINK_LIBS}
   )

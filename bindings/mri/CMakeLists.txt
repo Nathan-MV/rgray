@@ -65,8 +65,6 @@ set(COMMON_COMPILE_OPTIONS
 
 function(setup_library target)
   target_link_libraries(${target}
-    myproject_options
-    #myproject_warnings
     ${PROJECT_NAME}_static
     ${RUBY_LIBRARY}
   )
