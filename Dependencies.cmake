@@ -17,7 +17,7 @@ function(myproject_setup_dependencies)
     # raygui
     CPMAddPackage(NAME raygui
         GIT_REPOSITORY https://github.com/Nathan-MV/raygui.git
-        GIT_TAG e496ee4430aed72ab8edb477568507b230da69bd
+        GIT_TAG 7708eb42f4137d32ac2c7ea13224cdd4d06cec4d
     )
 
     # reasings

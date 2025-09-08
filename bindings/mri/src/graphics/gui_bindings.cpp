@@ -50,8 +50,14 @@ RB_METHOD_ARG_STR(rb_gui_set_tooltip, GuiSetTooltip, Qnil)
 // RAYGUIAPI void GuiSetIconScale(int scale);                      // Set default icon drawing size
 // RAYGUIAPI unsigned int *GuiGetIcons(void);                      // Get raygui icons data pointer
 // RAYGUIAPI char **GuiLoadIcons(const char *fileName, bool loadIconsName); // Load raygui icons file (.rgi) into internal icons data
+// Load icons from memory
+// WARNING: Binary files only
+// RAYGUIAPI char **GuiLoadIconsFromMemory(const unsigned char *fileData, int dataSize, bool loadIconsName)
 // RAYGUIAPI void GuiDrawIcon(int iconId, int posX, int posY, int pixelSize, Color color); // Draw icon using pixel size at specified position
 // #endif
+
+// Utility functions
+// RAYGUIAPI int GuiGetTextWidth(const char* text);  // Get text width considering gui style and icon size (if required)
 
 // Controls
 //----------------------------------------------------------------------------------------------------------
@@ -520,7 +526,7 @@ extern "C" void Init_Gui() {
   rb_define_const(rb_mGui, "DROPDOWNBOX", INT2NUM(DROPDOWNBOX));
   rb_define_const(rb_mGui, "TEXTBOX", INT2NUM(TEXTBOX));
   rb_define_const(rb_mGui, "VALUEBOX", INT2NUM(VALUEBOX));
-  rb_define_const(rb_mGui, "SPINNER", INT2NUM(SPINNER));
+  rb_define_const(rb_mGui, "CONTROL11", INT2NUM(CONTROL11));
   rb_define_const(rb_mGui, "LISTVIEW", INT2NUM(LISTVIEW));
   rb_define_const(rb_mGui, "COLORPICKER", INT2NUM(COLORPICKER));
   rb_define_const(rb_mGui, "SCROLLBAR", INT2NUM(SCROLLBAR));
@@ -584,8 +590,8 @@ extern "C" void Init_Gui() {
   rb_define_const(rb_mGui, "TEXT_READONLY", INT2NUM(TEXT_READONLY));
 
   // Spinner
-  rb_define_const(rb_mGui, "SPIN_BUTTON_WIDTH", INT2NUM(SPIN_BUTTON_WIDTH));
-  rb_define_const(rb_mGui, "SPIN_BUTTON_SPACING", INT2NUM(SPIN_BUTTON_SPACING));
+  rb_define_const(rb_mGui, "SPINNER_BUTTON_WIDTH", INT2NUM(SPINNER_BUTTON_WIDTH));
+  rb_define_const(rb_mGui, "SPINNER_BUTTON_SPACING", INT2NUM(SPINNER_BUTTON_SPACING));
 
   // ListView
   rb_define_const(rb_mGui, "LIST_ITEMS_HEIGHT", INT2NUM(LIST_ITEMS_HEIGHT));
