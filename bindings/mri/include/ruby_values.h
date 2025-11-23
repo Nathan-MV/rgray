@@ -12,11 +12,15 @@
 #include "math/vec2_bindings.h"
 #include "math/vec3_bindings.h"
 #include "math/vec4_bindings.h"
+#if defined(_WIN32) || defined(_WIN64)
+#include "fix_win32_compatibility.h"
+#endif
 #include <ruby.h>
 #include "ruby/encoding.h"
 #include "ruby/version.h"
 
-template <class T> auto rb_object_free(void *ptr) { delete static_cast<T *>(ptr); }
+    template <class T>
+    auto rb_object_free(void* ptr) { delete static_cast<T *>(ptr); }
 
 template <class T> auto rb_object_alloc(VALUE klass) {
   try {

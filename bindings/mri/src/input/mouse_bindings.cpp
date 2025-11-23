@@ -1,5 +1,4 @@
 #include "input/mouse_bindings.h"
-#include <ruby.h>
 
 // Input-related functions: mouse
 // RLAPI bool IsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once

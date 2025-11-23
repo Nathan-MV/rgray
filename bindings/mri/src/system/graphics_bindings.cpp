@@ -1,5 +1,4 @@
 #include "system/graphics_bindings.h"
-#include <ruby.h>
 
 // RLAPI void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
 RB_METHOD_ARG_INT_INT_STR(rb_init_window, InitWindow, self)

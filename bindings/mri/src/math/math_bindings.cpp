@@ -1,5 +1,4 @@
 #include "math/math_bindings.h"
-#include <ruby.h>
 #include "ruby_adapter.h"
 #include "ruby_values.h"
 

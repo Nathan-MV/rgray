@@ -1,5 +1,4 @@
 #include "graphics/draw_bindings.h"
-#include <ruby.h>
 
 // Drawing-related functions
 

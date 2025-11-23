@@ -1,8 +1,12 @@
 #pragma once
 
+#if defined(_WIN32) || defined(_WIN64)
+#  include "fix_win32_compatibility.h"
+#endif
+#include <ruby.h>
 #include <stdio.h>
 #include "rgray/raylib_values.h"
-#include <ruby.h>
+#include "ruby_values.h"
 
 extern VALUE rb_cBitmap;
 extern "C" void Init_Bitmap();

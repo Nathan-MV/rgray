@@ -1,5 +1,4 @@
 #include "input/touch_bindings.h"
-#include <ruby.h>
 
 // Input-related functions: touch
 // RLAPI int GetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)

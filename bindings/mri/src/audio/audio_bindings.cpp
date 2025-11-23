@@ -1,5 +1,4 @@
 #include "audio/audio_bindings.h"
-#include <ruby.h>
 
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)

@@ -1,6 +1,5 @@
 #include "graphics/gui_bindings.h"
 #include <cstring>
-#include <ruby.h>
 
 // Global gui state control functions
 // RAYGUIAPI void GuiEnable(void);                                 // Enable gui controls (global state)
