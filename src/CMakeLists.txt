@@ -18,6 +18,7 @@ set_target_properties(reasings PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # ---- Add Libraries ----
 
 add_library(${PROJECT_NAME}_static STATIC ${SRC_FILES})
+set_target_properties(${PROJECT_NAME}_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
 #add_library(${PROJECT_NAME}::${PROJECT_NAME}_static ALIAS ${PROJECT_NAME}_static)
 
 # ---- Setup common library properties ----

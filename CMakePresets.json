@@ -73,6 +73,19 @@
                 "CMAKE_TOOLCHAIN_FILE": "",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
             }
+        },
+        {
+            "name": "Fedora",
+            "displayName": "GCC 15.2.1 x86_64-redhat-linux",
+            "description": "Using compilers: C = /usr/lib64/ccache/gcc, CXX = /usr/lib64/ccache/g++",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/lib64/ccache/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/lib64/ccache/g++",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
         }
     ],
     "buildPresets": [
@@ -83,6 +96,12 @@
         {
             "name": "msys2",
             "configurePreset": "msys2"
+        },
+        {
+            "name": "Fedora",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "Fedora"
         }
     ]
 }
