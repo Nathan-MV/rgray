@@ -220,6 +220,14 @@ extern "C" void Init_Shader() {
   rb_define_const(rb_mKernel, "LOC_MAP_PREFILTER", INT2NUM(24));
   // Shader location: sampler2d texture: brdf
   rb_define_const(rb_mKernel, "LOC_MAP_BRDF", INT2NUM(25));
+  // Shader location: vertex attribute: boneIds
+  rb_define_const(rb_mKernel, "LOC_VERTEX_BONEIDS", INT2NUM(26));
+  // Shader location: vertex attribute: boneWeights
+  rb_define_const(rb_mKernel, "LOC_VERTEX_BONEWEIGHTS", INT2NUM(27));
+  // Shader location: array of matrices uniform: boneMatrices
+  rb_define_const(rb_mKernel, "LOC_BONE_MATRICES", INT2NUM(28));
+  // Shader location: vertex attribute: instanceTransform
+  rb_define_const(rb_mKernel, "LOC_VERTEX_INSTANCE_TX", INT2NUM(29));
 
   // Shader uniform data type
   // Shader uniform type: float
@@ -238,8 +246,16 @@ extern "C" void Init_Shader() {
   rb_define_const(rb_mKernel, "UNIFORM_IVEC3", INT2NUM(6));
   // Shader uniform type: ivec4 (4 int)
   rb_define_const(rb_mKernel, "UNIFORM_IVEC4", INT2NUM(7));
+  // Shader uniform type: unsigned int
+  rb_define_const(rb_mKernel, "UNIFORM_UINT", INT2NUM(8));
+  // Shader uniform type: uivec2 (2 unsigned int)
+  rb_define_const(rb_mKernel, "UNIFORM_UIVEC2", INT2NUM(9));
+  // Shader uniform type: uivec3 (3 unsigned int)
+  rb_define_const(rb_mKernel, "UNIFORM_UIVEC3", INT2NUM(10));
+  // Shader uniform type: uivec4 (4 unsigned int)
+  rb_define_const(rb_mKernel, "UNIFORM_UIVEC4", INT2NUM(11));
   // Shader uniform type: sampler2d
-  rb_define_const(rb_mKernel, "UNIFORM_SAMPLER2D", INT2NUM(8));
+  rb_define_const(rb_mKernel, "UNIFORM_SAMPLER2D", INT2NUM(12));
 
   // Shader attribute data types
   // Shader attribute type: float

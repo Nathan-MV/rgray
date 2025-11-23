@@ -175,6 +175,18 @@
 # @!parse LOC_MAP_BRDF = 25
 #   @return [Integer]
 
+# @!parse LOC_VERTEX_BONEIDS = 26
+#   @return [Integer]
+
+# @!parse LOC_VERTEX_BONEWEIGHTS = 27
+#   @return [Integer]
+
+# @!parse LOC_BONE_MATRICES = 28
+#   @return [Integer]
+
+# @!parse LOC_VERTEX_INSTANCE_TX = 29
+#   @return [Integer]
+
 # @!parse UNIFORM_FLOAT = 0
 #   @return [Integer]
 
@@ -199,7 +211,19 @@
 # @!parse UNIFORM_IVEC4 = 7
 #   @return [Integer]
 
-# @!parse UNIFORM_SAMPLER2D = 8
+# @!parse UNIFORM_UINT = 8
+#   @return [Integer]
+
+# @!parse UNIFORM_UIVEC2 = 9
+#   @return [Integer]
+
+# @!parse UNIFORM_UIVEC3 = 10
+#   @return [Integer]
+
+# @!parse UNIFORM_UIVEC4 = 11
+#   @return [Integer]
+
+# @!parse UNIFORM_SAMPLER2D = 12
 #   @return [Integer]
 
 # @!parse ATTRIB_FLOAT = 0

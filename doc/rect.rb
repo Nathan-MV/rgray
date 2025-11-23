@@ -67,8 +67,8 @@
 #   @param rec [Rect]
 #   @param topLeft [Color]
 #   @param bottomLeft [Color]
-#   @param topRight [Color]
 #   @param bottomRight [Color]
+#   @param topRight [Color]
 #   @return [Rect]
 
 # @!method draw_lines

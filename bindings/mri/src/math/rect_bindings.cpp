@@ -3,7 +3,7 @@
 VALUE rb_cRect;
 
 static auto rb_rect_initialize(int argc, VALUE* argv, VALUE self) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
 
   // Default values
   auto x = 0.0F;
@@ -38,18 +38,18 @@ RB_METHOD_RECT_SETTER(rb_rect_set_height, height)
 
 // RLAPI void DrawRectangle(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
 // RLAPI void DrawRectangleV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
-// Draw a color-filled rectangle (RayRectangle version)
+// Draw a color-filled rectangle (Rectangle version)
 static auto rb_draw_rectangle_rec(VALUE self, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
   DrawRectangleRec(rect, *color);
 
   return self;
 }
-// RLAPI void DrawRectanglePro(RayRectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
+// RLAPI void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
 static auto rb_draw_rectangle_pro(VALUE self, VALUE rb_origin, VALUE rb_rotation, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* origin = rb::get_safe<Vector2>(rb_origin, rb_cVec2);
   auto rotation = NUM2FLT(rb_rotation);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
@@ -60,7 +60,7 @@ static auto rb_draw_rectangle_pro(VALUE self, VALUE rb_origin, VALUE rb_rotation
 }
 // RLAPI void DrawRectangleGradientV(int posX, int posY, int width, int height, Color top, Color bottom); // Draw a vertical-gradient-filled rectangle
 static auto rb_draw_rectangle_gradient_v(VALUE self, VALUE rb_top, VALUE rb_bottom) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* top = rb::get_safe<Color>(rb_top, rb_cColor);
   auto* bottom = rb::get_safe<Color>(rb_bottom, rb_cColor);
 
@@ -70,7 +70,7 @@ static auto rb_draw_rectangle_gradient_v(VALUE self, VALUE rb_top, VALUE rb_bott
 }
 // RLAPI void DrawRectangleGradientH(int posX, int posY, int width, int height, Color left, Color right); // Draw a horizontal-gradient-filled rectangle
 static auto rb_draw_rectangle_gradient_h(VALUE self, VALUE rb_left, VALUE rb_right) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* left = rb::get_safe<Color>(rb_left, rb_cColor);
   auto* right = rb::get_safe<Color>(rb_right, rb_cColor);
 
@@ -78,30 +78,30 @@ static auto rb_draw_rectangle_gradient_h(VALUE self, VALUE rb_left, VALUE rb_rig
 
   return self;
 }
-// RLAPI void DrawRectangleGradientEx(RayRectangle rec, Color topLeft, Color bottomLeft, Color topRight, Color bottomRight); // Draw a gradient-filled rectangle with custom vertex colors
-static auto rb_draw_rectangle_gradient_ex(VALUE self, VALUE rb_top_left, VALUE rb_bottom_left, VALUE rb_top_right, VALUE rb_bottom_right) {
-  auto& rect = rb::get<RayRectangle>(self);
+// RLAPI void DrawRectangleGradientEx(Rectangle rec, Color topLeft, Color bottomLeft, Color bottomRight, Color topRight);  // Draw a gradient-filled rectangle with custom vertex colors
+static auto rb_draw_rectangle_gradient_ex(VALUE self, VALUE rb_top_left, VALUE rb_bottom_left, VALUE rb_bottom_right, VALUE rb_top_right) {
+  auto& rect = rb::get<Rectangle>(self);
   auto* top_left = rb::get_safe<Color>(rb_top_left, rb_cColor);
   auto* bottom_left = rb::get_safe<Color>(rb_bottom_left, rb_cColor);
-  auto* top_right = rb::get_safe<Color>(rb_top_right, rb_cColor);
   auto* bottom_right = rb::get_safe<Color>(rb_bottom_right, rb_cColor);
+  auto* top_right = rb::get_safe<Color>(rb_top_right, rb_cColor);
 
-  DrawRectangleGradientEx(rect, *top_left, *bottom_left, *top_right, *bottom_right);
+  DrawRectangleGradientEx(rect, *top_left, *bottom_left, *bottom_right, *top_right);
 
   return self;
 }
 // RLAPI void DrawRectangleLines(int posX, int posY, int width, int height, Color color);                   // Draw rectangle outline
 static auto rb_draw_rectangle_lines(VALUE self, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
   DrawRectangleLines(static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.width), static_cast<int>(rect.height), *color);
 
   return self;
 }
-// RLAPI void DrawRectangleLinesEx(RayRectangle rec, float lineThick, Color color);                            // Draw rectangle outline with extended parameters
+// RLAPI void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);                            // Draw rectangle outline with extended parameters
 static auto rb_draw_rectangle_lines_ex(VALUE self, VALUE rb_line_thick, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto lineThick = NUM2FLT(rb_line_thick);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
@@ -109,9 +109,9 @@ static auto rb_draw_rectangle_lines_ex(VALUE self, VALUE rb_line_thick, VALUE rb
 
   return self;
 }
-// RLAPI void DrawRectangleRounded(RayRectangle rec, float roundness, int segments, Color color);              // Draw rectangle with rounded edges
+// RLAPI void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);              // Draw rectangle with rounded edges
 static auto rb_draw_rectangle_rounded(VALUE self, VALUE rb_roundness, VALUE rb_segments, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto roundness = NUM2FLT(rb_roundness);
   auto segments = NUM2INT(rb_segments);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
@@ -120,9 +120,9 @@ static auto rb_draw_rectangle_rounded(VALUE self, VALUE rb_roundness, VALUE rb_s
 
   return self;
 }
-// RLAPI void DrawRectangleRoundedLines(RayRectangle rec, float roundness, int segments, Color color);         // Draw rectangle lines with rounded edges
+// RLAPI void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, Color color);         // Draw rectangle lines with rounded edges
 static auto rb_draw_rectangle_rounded_lines(VALUE self, VALUE rb_roundness, VALUE rb_segments, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto roundness = NUM2FLT(rb_roundness);
   auto segments = NUM2INT(rb_segments);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
@@ -131,9 +131,9 @@ static auto rb_draw_rectangle_rounded_lines(VALUE self, VALUE rb_roundness, VALU
 
   return self;
 }
-// RLAPI void DrawRectangleRoundedLinesEx(RayRectangle rec, float roundness, int segments, float lineThick, Color color); // Draw rectangle with rounded edges outline
+// RLAPI void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, float lineThick, Color color); // Draw rectangle with rounded edges outline
 static auto rb_draw_rectangle_rounded_lines_ex(VALUE self, VALUE rb_roundness, VALUE rb_segments, VALUE rb_line_thick, VALUE rb_color) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto roundness = NUM2FLT(rb_roundness);
   auto segments = NUM2INT(rb_segments);
   auto lineThick = NUM2FLT(rb_line_thick);
@@ -144,28 +144,28 @@ static auto rb_draw_rectangle_rounded_lines_ex(VALUE self, VALUE rb_roundness, V
   return self;
 }
 
-// RLAPI bool CheckCollisionRecs(RayRectangle rec1, RayRectangle rec2);                                           // Check collision between two rectangles
+// RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);                                           // Check collision between two rectangles
 static auto rb_check_collision_recs(VALUE self, VALUE rb_other) {
-  auto& rect = rb::get<RayRectangle>(self);
-  auto* other = rb::get_safe<RayRectangle>(rb_other, rb_cRect);
+  auto& rect = rb::get<Rectangle>(self);
+  auto* other = rb::get_safe<Rectangle>(rb_other, rb_cRect);
 
   auto result = CheckCollisionRecs(rect, *other);
 
   return result ? Qtrue : Qfalse;
 }
-// RLAPI bool CheckCollisionPointRec(Vector2 point, RayRectangle rec);                                         // Check if point is inside rectangle
+// RLAPI bool CheckCollisionPointRec(Vector2 point, Rectangle rec);                                         // Check if point is inside rectangle
 static auto rb_check_collision_point_rec(VALUE self, VALUE rb_point) {
-  auto& rect = rb::get<RayRectangle>(self);
+  auto& rect = rb::get<Rectangle>(self);
   auto* point = rb::get_safe<Vector2>(rb_point, rb_cVec2);
 
   auto result = CheckCollisionPointRec(*point, rect);
 
   return result ? Qtrue : Qfalse;
 }
-// RLAPI RayRectangle GetCollisionRec(RayRectangle rec1, RayRectangle rec2);                                         // Get collision rectangle for two rectangles collision
+// RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);                                         // Get collision rectangle for two rectangles collision
 static auto rb_get_collision_rec(VALUE self, VALUE rb_other) {
-  auto& rect = rb::get<RayRectangle>(self);
-  auto* other = rb::get_safe<RayRectangle>(rb_other, rb_cRect);
+  auto& rect = rb::get<Rectangle>(self);
+  auto* other = rb::get_safe<Rectangle>(rb_other, rb_cRect);
 
   rect = GetCollisionRec(rect, *other);
 
@@ -174,7 +174,7 @@ static auto rb_get_collision_rec(VALUE self, VALUE rb_other) {
 
 extern "C" void Init_Rect() {
   rb_cRect = rb_define_class("Rect", rb_cObject);
-  rb_define_alloc_func(rb_cRect, rb::alloc<RayRectangle>);
+  rb_define_alloc_func(rb_cRect, rb::alloc<Rectangle>);
 
   rb_define_method(rb_cRect, "initialize", rb_rect_initialize, -1);
   rb_define_method(rb_cRect, "x", rb_rect_get_x, 0);

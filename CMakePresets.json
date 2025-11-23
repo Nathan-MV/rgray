@@ -63,28 +63,24 @@
             }
         },
         {
-            "name": "Configure preset using toolchain file",
-            "displayName": "Configure preset using toolchain file",
-            "description": "Sets Ninja generator, build and install directory",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_TOOLCHAIN_FILE": "",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
-            }
-        },
-        {
-            "name": "Fedora",
-            "displayName": "GCC 15.2.1 x86_64-redhat-linux",
-            "description": "Using compilers: C = /usr/lib64/ccache/gcc, CXX = /usr/lib64/ccache/g++",
+            "name": "fedora",
+            "displayName": "Clang + Ninja",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "CMAKE_C_COMPILER": "/usr/lib64/ccache/gcc",
-                "CMAKE_CXX_COMPILER": "/usr/lib64/ccache/g++",
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+                "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -ffast-math -flto=full -march=native",
+                "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=lld",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=lld",
+                "CMAKE_MODULE_LINKER_FLAGS": "-fuse-ld=lld",
+                "CMAKE_CXX_FLAGS": "-g0",
+                "CMAKE_C_FLAGS": "-g0"
             }
         }
     ],
@@ -98,10 +94,10 @@
             "configurePreset": "msys2"
         },
         {
-            "name": "Fedora",
+            "name": "fedora",
             "description": "",
             "displayName": "",
-            "configurePreset": "Fedora"
+            "configurePreset": "fedora"
         }
     ]
 }

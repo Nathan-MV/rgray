@@ -1,2 +1,0 @@
-raygui changes:
-Rectangle > RayRectangle

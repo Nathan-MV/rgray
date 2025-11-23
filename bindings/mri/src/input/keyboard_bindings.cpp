@@ -20,11 +20,15 @@ RB_METHOD_BOOL_ARG_INT(rb_key_up, IsKeyUp)
 RB_METHOD_INT(rb_get_key_pressed, GetKeyPressed)
 // RLAPI int GetCharPressed(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
 RB_METHOD_INT(rb_get_char_pressed, GetCharPressed)
+// RLAPI const char* GetKeyName(int key);  // Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
+RB_METHOD_CONST_STR_ARG_INT(rb_get_key_name, GetKeyName)
 
 // RLAPI void SetClipboardText(const char *text);                    // Set clipboard text content
 RB_METHOD_ARG_STR(rb_set_clipboard_text, SetClipboardText, Qnil)
 // RLAPI const char *GetClipboardText(void);                         // Get clipboard text content
 RB_METHOD_CONST_STR(rb_get_clipboard_text, GetClipboardText)
+// RLAPI Image GetClipboardImage(void);                              // Get clipboard image content
+RB_METHOD_TO_IMG(rb_get_clipboard_image, GetClipboardImage)
 
 extern "C" void Init_Keyboard() {
   VALUE rb_mKeyboard = rb_define_module("Keyboard");
@@ -36,9 +40,11 @@ extern "C" void Init_Keyboard() {
   rb_define_module_function(rb_mKeyboard, "up?", rb_key_up, 1);
   rb_define_module_function(rb_mKeyboard, "pressed", rb_get_key_pressed, 0);
   rb_define_module_function(rb_mKeyboard, "char_pressed", rb_get_char_pressed, 0);
+  rb_define_module_function(rb_mKeyboard, "key_name", rb_get_key_name, 1);
 
   rb_define_module_function(rb_mKeyboard, "clipboard_text=", rb_set_clipboard_text, 1);
   rb_define_module_function(rb_mKeyboard, "clipboard_text", rb_get_clipboard_text, 0);
+  rb_define_module_function(rb_mKeyboard, "clipboard_image", rb_get_clipboard_image, 0);
 
   // Alphanumeric keys
   rb_define_const(rb_mKeyboard, "NULL", INT2NUM(0));

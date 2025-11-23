@@ -86,10 +86,10 @@ static auto rb_update_texture(VALUE self, VALUE rb_pixels) {
 
   return self;
 }
-// RLAPI void UpdateTextureRec(Texture2D texture, RayRectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
+// RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
 static auto rb_update_texture_rec(VALUE self, VALUE rb_rec, VALUE rb_pixels) {
   auto& texture = rb::get<Texture2D>(self);
-  auto* rect = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  auto* rect = rb::get_safe<Rectangle>(rb_rec, rb_cRect);
   const auto* pixels = RSTRING_PTR(rb_pixels);
 
   UpdateTextureRec(texture, *rect, pixels);
@@ -170,7 +170,7 @@ static auto rb_draw_texture_rec(int argc, VALUE* argv, VALUE self) {
   rb_scan_args(argc, argv, "21", &rb_source, &rb_position, &rb_tint);
 
   auto& texture = rb::get<Texture2D>(self);
-  auto* source = rb::get_safe<RayRectangle>(rb_source, rb_cRect);
+  auto* source = rb::get_safe<Rectangle>(rb_source, rb_cRect);
   auto* position = rb::get_safe<Vector2>(rb_position, rb_cVec2);
   auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
 
@@ -185,8 +185,8 @@ static auto rb_draw_texture_pro(int argc, VALUE* argv, VALUE self) {
   rb_scan_args(argc, argv, "14", &rb_source, &rb_dest, &rb_origin, &rb_rotation, &rb_tint);
 
   auto& texture = rb::get<Texture2D>(self);
-  auto* source = rb::get_safe<RayRectangle>(rb_source, rb_cRect);
-  auto dst = !NIL_P(rb_dest) ? *rb::get_safe<RayRectangle>(rb_dest, rb_cRect) : (RayRectangle){source->x, source->y, fabsf(source->width), fabsf(source->height)};
+  auto* source = rb::get_safe<Rectangle>(rb_source, rb_cRect);
+  auto dst = !NIL_P(rb_dest) ? *rb::get_safe<Rectangle>(rb_dest, rb_cRect) : (Rectangle){source->x, source->y, fabsf(source->width), fabsf(source->height)};
   auto origin = !NIL_P(rb_origin) ? *rb::get_safe<Vector2>(rb_origin, rb_cVec2) : Vector2{0.0F, 0.0F};
   auto rotation = NIL_P(rb_rotation) ? 0.0 : NUM2FLT(rb_rotation);
   auto tint = !NIL_P(rb_tint) ? *rb::get_safe<Color>(rb_tint, rb_cColor) : (Color){255, 255, 255, 255};
@@ -195,7 +195,7 @@ static auto rb_draw_texture_pro(int argc, VALUE* argv, VALUE self) {
 
   return self;
 }
-// RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, RayRectangle dest, Vector2 origin, float rotation, Color tint); // Draws a texture (or part of it) that stretches or shrinks nicely
+// RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint); // Draws a texture (or part of it) that stretches or shrinks nicely
 
 // Texture parameters: filter mode
 // NOTE 1: Filtering considers mipmaps if available in the texture

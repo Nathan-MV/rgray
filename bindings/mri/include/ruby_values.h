@@ -176,3 +176,10 @@ static int *get_int_array(VALUE rb_array) {
     auto res = func(NUM2INT(val));                 \
     return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
+
+// Wrapper for image objects (example for a Image type)
+#define RB_METHOD_TO_IMG(name, func)              \
+  static auto name(VALUE self) {                   \
+    auto res = func();                             \
+    return rb::alloc_copy<Image>(rb_cVec2, res); \
+  }

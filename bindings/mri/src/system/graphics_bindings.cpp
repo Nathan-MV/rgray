@@ -3,8 +3,8 @@
 
 // RLAPI void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
 RB_METHOD_ARG_INT_INT_STR(rb_init_window, InitWindow, self)
-// RLAPI void RayCloseWindow(void);                                     // Close window and unload OpenGL context
-RB_METHOD(rb_close_window, RayCloseWindow)
+// RLAPI void CloseWindow(void);                                     // Close window and unload OpenGL context
+RB_METHOD(rb_close_window, CloseWindow)
 // RLAPI bool WindowShouldClose(void);                               // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
 RB_METHOD_BOOL(rb_window_should_close, WindowShouldClose)
 // RLAPI bool IsWindowReady(void);                                   // Check if window has been initialized successfully
@@ -35,7 +35,7 @@ RB_METHOD(rb_toggle_borderless_windowed, ToggleBorderlessWindowed)
 RB_METHOD(rb_maximize_window, MaximizeWindow)
 // RLAPI void MinimizeWindow(void);                                  // Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
 RB_METHOD(rb_minimize_window, MinimizeWindow)
-// RLAPI void RestoreWindow(void);                                   // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
+// RLAPI void RestoreWindow(void);                                   // Restore window from being minimized/maximized
 RB_METHOD(rb_restore_window, RestoreWindow)
 // RLAPI void SetWindowIcon(Image image);                            // Set icon for window (single image, RGBA 32bit, only PLATFORM_DESKTOP)
 RB_METHOD_ARG_IMG(rb_set_window_icon, SetWindowIcon, Qnil)
@@ -98,8 +98,8 @@ RB_METHOD(rb_disable_event_waiting, DisableEventWaiting)
 RB_METHOD_ARG_INT(rb_set_exit_key, SetExitKey, Qnil)
 
 // Cursor-related functions
-// RLAPI void RayShowCursor(void);                                      // Shows cursor
-RB_METHOD(rb_show_cursor, RayShowCursor)
+// RLAPI void ShowCursor(void);                                      // Shows cursor
+RB_METHOD(rb_show_cursor, ShowCursor)
 // RLAPI void HideCursor(void);                                      // Hides cursor
 RB_METHOD(rb_hide_cursor, HideCursor)
 // RLAPI bool IsCursorHidden(void);                                  // Check if cursor is not visible

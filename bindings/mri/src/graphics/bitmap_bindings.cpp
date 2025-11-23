@@ -10,7 +10,7 @@ VALUE rb_cBitmap;
 
 // Image loading functions
 // NOTE: These functions do not require GPU access
-// RLAPI Image RayLoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)auto
+// RLAPI Image LoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)auto
 static auto rb_image_initialize(int argc, VALUE* argv, VALUE self) {
   auto& img = rb::get<Image>(self);
 
@@ -20,7 +20,7 @@ static auto rb_image_initialize(int argc, VALUE* argv, VALUE self) {
 
       if (RB_TYPE_P(arg, T_STRING)) {
         const auto* name = StringValueCStr(argv[0]);
-        img = RayLoadImage(name);
+        img = LoadImage(name);
       } else if (rb_obj_is_kind_of(arg, rb_cSprite)) {
         auto* texture = rb::get_safe<Texture2D>(arg, rb_cSprite);
         img = LoadImageFromTexture(*texture);
@@ -283,10 +283,10 @@ static auto rb_image_copy(VALUE self) {
 
   return rb::alloc_copy<Image>(rb_cBitmap, result);
 }
-// RLAPI Image ImageFromImage(Image image, RayRectangle rec);                                                  // Create an image from another image piece
+// RLAPI Image ImageFromImage(Image image, Rectangle rec);                                                  // Create an image from another image piece
 static auto rb_image_from_image(VALUE self, VALUE rb_image, VALUE rb_rec) {
   auto& img = rb::get<Image>(self);
-  auto* rec = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  auto* rec = rb::get_safe<Rectangle>(rb_rec, rb_cRect);
 
   auto result = ImageFromImage(img, *rec);
 
@@ -341,10 +341,10 @@ static auto rb_image_to_pot(VALUE self, VALUE rb_fill) {
 
   return self;
 }
-// RLAPI void ImageCrop(Image *image, RayRectangle crop);                                                      // Crop an image to a defined rectangle
+// RLAPI void ImageCrop(Image *image, Rectangle crop);                                                      // Crop an image to a defined rectangle
 static auto rb_image_crop(VALUE self, VALUE rb_crop) {
   auto& img = rb::get<Image>(self);
-  auto* crop = rb::get_safe<RayRectangle>(rb_crop, rb_cRect);
+  auto* crop = rb::get_safe<Rectangle>(rb_crop, rb_cRect);
 
   ImageCrop(&img, *crop);
 
@@ -603,14 +603,14 @@ static auto rb_unload_image_palette(VALUE self, VALUE rb_colors) {
 
   return Qnil;
 }
-// RLAPI RayRectangle GetImageAlphaBorder(Image image, float threshold);                                       // Get image alpha border rectangle
+// RLAPI Rectangle GetImageAlphaBorder(Image image, float threshold);                                       // Get image alpha border rectangle
 static auto rb_get_image_alpha_border(VALUE self, VALUE rb_threshold) {
   auto& img = rb::get<Image>(self);
   auto threshold = NUM2FLT(rb_threshold);
 
   auto result = GetImageAlphaBorder(img, threshold);
 
-  return Data_Wrap_Struct(rb_cRect, nullptr, rb_object_free<RayRectangle>, &result);
+  return Data_Wrap_Struct(rb_cRect, nullptr, rb_object_free<Rectangle>, &result);
 }
 // RLAPI Color GetImageColor(Image image, int x, int y);                                                    // Get image pixel color at (x, y) position
 static auto rb_get_image_color(VALUE self, VALUE rb_x, VALUE rb_y) {
@@ -761,20 +761,20 @@ static auto rb_image_draw_rectangle_v(VALUE self, VALUE rb_position, VALUE rb_si
 
   return self;
 }
-// RLAPI void ImageDrawRectangleRec(Image *dst, RayRectangle rec, Color color);                                // Draw rectangle within an image
+// RLAPI void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color);                                // Draw rectangle within an image
 static auto rb_image_draw_rectangle_rec(VALUE self, VALUE rb_rec, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
-  auto* rec = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  auto* rec = rb::get_safe<Rectangle>(rb_rec, rb_cRect);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
   ImageDrawRectangleRec(&img, *rec, *color);
 
   return self;
 }
-// RLAPI void ImageDrawRectangleLines(Image *dst, RayRectangle rec, int thick, Color color);                   // Draw rectangle lines within an image
+// RLAPI void ImageDrawRectangleLines(Image *dst, Rectangle rec, int thick, Color color);                   // Draw rectangle lines within an image
 static auto rb_image_draw_rectangle_lines(VALUE self, VALUE rb_rec, VALUE rb_thick, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
-  auto* rec = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  auto* rec = rb::get_safe<Rectangle>(rb_rec, rb_cRect);
   auto thick = NUM2INT(rb_thick);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
@@ -820,7 +820,7 @@ static auto rb_image_draw_triangle_lines(VALUE self, VALUE rb_v1, VALUE rb_v2, V
 
   return self;
 }
-// RLAPI void ImageDrawTriangleFan(Image *dst, Vector2 *points, int pointCount, Color color);               // Draw a triangle fan defined by points within an image (first vertex is the center)
+// RLAPI void ImageDrawTriangleFan(Image *dst, const Vector2 *points, int pointCount, Color color);               // Draw a triangle fan defined by points within an image (first vertex is the center)
 static auto rb_image_draw_triangle_fan(VALUE self, VALUE rb_points, VALUE rb_point_count, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
   auto* points = rb::get_safe<Vector2>(rb_points, rb_cVec2);
@@ -831,7 +831,7 @@ static auto rb_image_draw_triangle_fan(VALUE self, VALUE rb_points, VALUE rb_poi
 
   return self;
 }
-// RLAPI void ImageDrawTriangleStrip(Image *dst, Vector2 *points, int pointCount, Color color);             // Draw a triangle strip defined by points within an image
+// RLAPI void ImageDrawTriangleStrip(Image *dst, const Vector2 *points, int pointCount, Color color);             // Draw a triangle strip defined by points within an image
 static auto rb_image_draw_triangle_strip(VALUE self, VALUE rb_points, VALUE rb_point_count, VALUE rb_color) {
   auto& img = rb::get<Image>(self);
   auto* points = rb::get_safe<Vector2>(rb_points, rb_cVec2);
@@ -842,12 +842,12 @@ static auto rb_image_draw_triangle_strip(VALUE self, VALUE rb_points, VALUE rb_p
 
   return self;
 }
-// RLAPI void ImageDraw(Image *dst, Image src, RayRectangle srcRec, RayRectangle dstRec, Color tint);             // Draw a source image within a destination image (tint applied to source)
+// RLAPI void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint);             // Draw a source image within a destination image (tint applied to source)
 static auto rb_image_draw(VALUE self, VALUE rb_src, VALUE rb_src_rec, VALUE rb_dst_rec, VALUE rb_tint) {
   auto& dst = rb::get<Image>(self);
   auto* src = get_image(rb_src);
-  auto* src_rec = rb::get_safe<RayRectangle>(rb_src_rec, rb_cRect);
-  auto* dst_rec = rb::get_safe<RayRectangle>(rb_dst_rec, rb_cRect);
+  auto* src_rec = rb::get_safe<Rectangle>(rb_src_rec, rb_cRect);
+  auto* dst_rec = rb::get_safe<Rectangle>(rb_dst_rec, rb_cRect);
   auto* tint = rb::get_safe<Color>(rb_tint, rb_cColor);
 
   ImageDraw(&dst, *src, *src_rec, *dst_rec, *tint);

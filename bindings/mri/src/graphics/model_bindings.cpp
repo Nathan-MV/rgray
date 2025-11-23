@@ -20,8 +20,8 @@
 // RLAPI void DrawModelPointsEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model as points with extended parameters
 // RLAPI void DrawBoundingBox(BoundingBox box, Color color);                                   // Draw bounding box (wires)
 // RLAPI void DrawBillboard(Camera camera, Texture2D texture, Vector3 position, float scale, Color tint);   // Draw a billboard texture
-// RLAPI void DrawBillboardRec(Camera camera, Texture2D texture, RayRectangle source, Vector3 position, Vector2 size, Color tint); // Draw a billboard texture defined by source
-// RLAPI void DrawBillboardPro(Camera camera, Texture2D texture, RayRectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint); // Draw a billboard texture defined by source and rotation
+// RLAPI void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector2 size, Color tint); // Draw a billboard texture defined by source
+// RLAPI void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint); // Draw a billboard texture defined by source and rotation
 
 // Model animations loading/unloading functions
 // RLAPI ModelAnimation *LoadModelAnimations(const char *fileName, int *animCount);            // Load model animations from file
@@ -29,7 +29,7 @@
 // RLAPI void UnloadModelAnimation(ModelAnimation anim);                                       // Unload animation data
 // RLAPI void UnloadModelAnimations(ModelAnimation *animations, int animCount);                // Unload animation array data
 // RLAPI bool IsModelAnimationValid(Model model, ModelAnimation anim);                         // Check model animation skeleton match
-// RLAPI void UpdateModelAnimationBoneMatrices(Model model, ModelAnimation anim, int frame);   // Update model animation mesh bone matrices
+// RLAPI void UpdateModelAnimationBones(Model model, ModelAnimation anim, int frame);  // Update model animation mesh bone matrices (GPU skinning)
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)

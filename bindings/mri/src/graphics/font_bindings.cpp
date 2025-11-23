@@ -18,12 +18,12 @@ static auto rb_initialize_text(VALUE self, VALUE rb_filename) {
 
   return self;
 }
-// RLAPI Font LoadFontEx(const char *fileName, int fontSize, int *codepoints, int codepointCount); // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set
+// RLAPI Font LoadFontEx(const char *fileName, int fontSize, const int *codepoints, int codepointCount); // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set
 // RLAPI Font LoadFontFromImage(Image image, Color key, int firstChar);                        // Load font from Image (XNA style)
-// RLAPI Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+// RLAPI Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, const int *codepoints, int codepointCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
 // RLAPI bool IsFontValid(Font font);                                                          // Check if a font is ready
-// RLAPI GlyphInfo *LoadFontData(const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount, int type); // Load font data for further use
-// RLAPI Image GenImageFontAtlas(const GlyphInfo *glyphs, RayRectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
+// RLAPI GlyphInfo* LoadFontData(const unsigned char* fileData, int dataSize, int fontSize, const int* codepoints, int codepointCount, int type, int* glyphCount);  // Load font data for further use
+// RLAPI Image GenImageFontAtlas(const GlyphInfo *glyphs, Rectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
 // RLAPI void UnloadFontData(GlyphInfo *glyphs, int glyphCount);                               // Unload font chars info data (RAM)
 
 // RLAPI void UnloadFont(Font font);                                                           // Unload font from GPU memory (VRAM)
@@ -38,7 +38,7 @@ static auto rb_unload_font(VALUE self) {
 // RLAPI bool ExportFontAsCode(Font font, const char *fileName);                               // Export font as code file, returns true on success
 
 // Text drawing functions
-// RLAPI void RayDrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
+// RLAPI void DrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
 static auto rb_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos_y, VALUE rb_font_size, VALUE rb_color) {
   const auto* text = StringValueCStr(rb_text);
   auto posX = NUM2INT(rb_pos_x);
@@ -46,11 +46,11 @@ static auto rb_draw_text(VALUE self, VALUE rb_text, VALUE rb_pos_x, VALUE rb_pos
   auto fontSize = NUM2INT(rb_font_size);
   auto* color = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  RayDrawText(text, posX, posY, fontSize, *color);
+  DrawText(text, posX, posY, fontSize, *color);
 
   return self;
 }
-// RLAPI void RayDrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
+// RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
 static auto rb_draw_text_ex(VALUE self, VALUE rb_text, VALUE rb_pos, VALUE rb_font_size, VALUE rb_spacing, VALUE rb_color) {
   auto& font = rb::get<Font>(self);
   const auto* text = StringValueCStr(rb_text);
@@ -59,7 +59,7 @@ static auto rb_draw_text_ex(VALUE self, VALUE rb_text, VALUE rb_pos, VALUE rb_fo
   auto spacing = NUM2FLT(rb_spacing);
   auto* tint = rb::get_safe<Color>(rb_color, rb_cColor);
 
-  RayDrawTextEx(font, text, *position, fontSize, spacing, *tint);
+  DrawTextEx(font, text, *position, fontSize, spacing, *tint);
 
   return self;
 }
@@ -129,7 +129,7 @@ static auto rb_measure_text_ex(VALUE self, VALUE rb_text, VALUE rb_font_size, VA
 }
 // RLAPI int GetGlyphIndex(Font font, int codepoint);                                          // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
 // RLAPI GlyphInfo GetGlyphInfo(Font font, int codepoint);                                     // Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
-// RLAPI RayRectangle GetGlyphAtlasRec(Font font, int codepoint);                                 // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
+// RLAPI Rectangle GetGlyphAtlasRec(Font font, int codepoint);                                 // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
 
 // Text codepoints management functions (unicode characters)
 // RLAPI char *LoadUTF8(const int *codepoints, int length);                // Load UTF-8 text encoded from codepoints array

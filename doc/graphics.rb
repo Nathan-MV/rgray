@@ -86,7 +86,7 @@
 #   @return [void]
 
 # @!method restore
-#   Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
+#   Restore window from being minimized/maximized
 #   @param void [void]
 #   @return [void]
 

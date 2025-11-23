@@ -33,12 +33,22 @@
 #   @param void [void]
 #   @return [Integer]
 
+# @!method key_name
+#   Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
+#   @param key [Integer]
+#   @return [String]
+
 # @!method clipboard_text=
 #   Set clipboard text content
 #   @param text [String]
 #   @return [void]
 
 # @!method clipboard_text
+#   @return [void]
+
+# @!method clipboard_image
+#   Get clipboard image content
+#   @param void [void]
 #   @return [void]
 
 # @!parse NULL = 0

@@ -110,10 +110,10 @@ static VALUE rb_check_collision_circles(VALUE self, VALUE rb_other) {
 
   return result ? Qtrue : Qfalse;
 }
-// RLAPI bool CheckCollisionCircleRec(Vector2 center, float radius, RayRectangle rec);                         // Check collision between circle and rectangle
+// RLAPI bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec);                         // Check collision between circle and rectangle
 static VALUE rb_check_collision_circle_rec(VALUE self, VALUE rb_rec) {
   auto& circle = rb::get<Circle>(self);
-  auto* rec = rb::get_safe<RayRectangle>(rb_rec, rb_cRect);
+  auto* rec = rb::get_safe<Rectangle>(rb_rec, rb_cRect);
 
   auto result = CheckCollisionCircleRec(circle.center, circle.radius, *rec);
 
