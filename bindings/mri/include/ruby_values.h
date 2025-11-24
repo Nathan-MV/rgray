@@ -181,9 +181,9 @@ static int *get_int_array(VALUE rb_array) {
     return rb::alloc_copy<Vector2>(rb_cVec2, res); \
   }
 
-// Wrapper for image objects (example for a Image type)
+// Wrapper for image objects (example for an Image type)
 #define RB_METHOD_TO_IMG(name, func)              \
-  static auto name(VALUE self) {                   \
-    auto res = func();                             \
-    return rb::alloc_copy<Image>(rb_cVec2, res); \
+  static auto name(VALUE self) {                  \
+    Image res = func();                           \
+    return rb::alloc_copy<Image>(rb_cImage, res); \
   }
