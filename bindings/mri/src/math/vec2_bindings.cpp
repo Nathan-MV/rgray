@@ -145,31 +145,38 @@ static auto rb_vec2_screen_bounds(VALUE self, VALUE size_val) {
   return Qfalse;
 }
 
-static auto rb_random_movement(int argc, VALUE* argv, VALUE self) {
+static VALUE rb_random_movement(int argc, VALUE* argv, VALUE self) {
   auto& position = rb::get<Vector2>(self);
-  VALUE direction_sym = Qnil, speed;
+  VALUE speed, direction_sym = Qnil;
+
   rb_scan_args(argc, argv, "11", &speed, &direction_sym);
 
-  auto speed_value = NUM2FLT(speed);
+  float speed_value = NUM2FLT(speed);
   std::string direction;
 
   if (!NIL_P(direction_sym)) {
-    ID dir_id = SYM2ID(direction_sym);
-    if (dir_id == rb_intern("up")) {
+    static ID id_up    = rb_intern("up");
+    static ID id_down  = rb_intern("down");
+    static ID id_right = rb_intern("right");
+    static ID id_left  = rb_intern("left");
+
+    ID sym = SYM2ID(direction_sym);
+
+    if (sym == id_up) {
       direction = "up";
-    } else if (dir_id == rb_intern("down")) {
+    } else if (sym == id_down) {
       direction = "down";
-    } else if (dir_id == rb_intern("right")) {
+    } else if (sym == id_right) {
       direction = "right";
-    } else if (dir_id == rb_intern("left")) {
+    } else if (sym == id_left) {
       direction = "left";
     } else {
-      rb_raise(rb_eArgError, "Invalid direction symbol");
+      const char* name = rb_id2name(sym);
+      rb_raise(rb_eArgError, "Invalid direction symbol: %s", name ? name : "<invalid>");
     }
   }
 
   position = Vector2RandomMovement(position, speed_value, direction);
-
   return self;
 }
 
