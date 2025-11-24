@@ -1,6 +1,10 @@
 #pragma once
 
 #include <stdio.h>
+#if defined(_WIN32) || defined(_WIN64)
+#  include "fix_win32_compatibility.h"
+#endif
+#include <ruby.h>
 #include "rgray/raylib_values.h"
 #include "ruby_adapter.h"
 #include "ruby_values.h"
