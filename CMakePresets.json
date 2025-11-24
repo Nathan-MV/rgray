@@ -11,6 +11,7 @@
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "TRUE"
             }
         },
@@ -32,29 +33,22 @@
             }
         },
         {
-            "name": "windows_mri_3_0",
+            "name": "windows-release",
             "inherits": "default",
-            "displayName": "Windows MRI 3.0",
-            "generator": "MinGW Makefiles",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "C:/Ruby30-x64/msys64/mingw64/bin/gcc.exe",
-                "CMAKE_CXX_COMPILER": "C:/Ruby30-x64/msys64/mingw64/bin/g++.exe",
-                "CMAKE_MAKE_PROGRAM": "C:/Ruby30-x64/msys64/mingw64/bin/mingw32-make.exe"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-        {
-            "name": "msys2",
-            "inherits": "default",
-            "displayName": "Windows MSYS2",
+            "displayName": "Windows MSYS2 (ucrt64)",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
                 "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe",
-                "CMAKE_MAKE_PROGRAM": "C:/msys64/ucrt64/bin/ninja.exe"
+                "CMAKE_C_COMPILER_LAUNCHER": "C:/msys64/ucrt64/bin/sccache.exe",
+                "CMAKE_CXX_COMPILER_LAUNCHER": "C:/msys64/ucrt64/bin/sccache.exe",
+                "CMAKE_MAKE_PROGRAM": "C:/msys64/ucrt64/bin/ninja.exe",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -ffast-math -flto=auto -march=native",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -ffast-math -flto=auto -march=native",
+                "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=mold",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=mold",
+                "CMAKE_MODULE_LINKER_FLAGS": "-fuse-ld=mold",
+                "CMAKE_CXX_FLAGS": "-g0",
+                "CMAKE_C_FLAGS": "-g0"
             },
             "condition": {
                 "type": "equals",
@@ -63,18 +57,14 @@
             }
         },
         {
-            "name": "fedora",
-            "displayName": "Clang + Ninja",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "name": "linux-release",
+            "inherits": "default",
+            "displayName": "Linux Clang + Ninja",
             "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
                 "CMAKE_C_COMPILER_LAUNCHER": "sccache",
                 "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
                 "CMAKE_CXX_FLAGS_RELEASE": "-O3 -ffast-math -flto=full -march=native",
                 "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=mold",
                 "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=mold",
@@ -82,22 +72,42 @@
                 "CMAKE_CXX_FLAGS": "-g0",
                 "CMAKE_C_FLAGS": "-g0"
             }
+        },
+        {
+            "name": "macos-release",
+            "inherits": "default",
+            "displayName": "macOS Clang + Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+                "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -ffast-math -flto=full -march=native",
+                "CMAKE_C_FLAGS_RELEASE": "-O3 -ffast-math -flto=full -march=native"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
         }
     ],
     "buildPresets": [
         {
-            "name": "windows_mri_3_0",
-            "configurePreset": "windows_mri_3_0"
+            "name": "windows-release-mri-3-4",
+            "configurePreset": "windows_mri_3_4"
         },
         {
-            "name": "msys2",
-            "configurePreset": "msys2"
+            "name": "windows-release",
+            "configurePreset": "windows-release"
         },
         {
-            "name": "fedora",
-            "description": "",
-            "displayName": "",
-            "configurePreset": "fedora"
+            "name": "linux-release",
+            "configurePreset": "linux-release"
+        },
+        {
+            "name": "macos-release",
+            "configurePreset": "macos-release"
         }
     ]
 }
