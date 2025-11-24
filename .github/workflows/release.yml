@@ -19,26 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        preset: [Release]
-        include:
-          - os: windows-latest
-            configure_preset: windows-release
-            build_preset: windows-release
-
-          - os: ubuntu-latest
-            configure_preset: linux-release
-            build_preset: linux-release
-
-          - os: macos-latest
-            configure_preset: macos-release
-            build_preset: macos-release
+        build_type: [Release]
 
     steps:
       - uses: actions/checkout@v4
 
-      # --------------------------------------------------
-      # Windows
-      # --------------------------------------------------
       - name: Install Windows Dependencies
         if: matrix.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
@@ -59,9 +44,6 @@ jobs:
             mingw-w64-ucrt-x86_64-cppcheck
             git
 
-      # --------------------------------------------------
-      # Linux
-      # --------------------------------------------------
       - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -71,52 +53,35 @@ jobs:
             libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
             libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
 
-      # --------------------------------------------------
-      # macOS
-      # --------------------------------------------------
       - name: Install MacOS Dependencies
         if: matrix.os == 'macos-latest'
         run: |
           brew update
           brew install cmake ninja ruby raylib sccache mold cppcheck llvm clang-format
 
-      # --------------------------------------------------
-      # Configure with Presets (Windows)
-      # --------------------------------------------------
-      - name: CMake Configure (Preset) [Windows]
+      - name: Build Project (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
-        run: cmake --preset ${{ matrix.configure_preset }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
-      # --------------------------------------------------
-      # Configure with Presets (Linux/macOS)
-      # --------------------------------------------------
-      - name: CMake Configure (Preset) [Unix]
-        if: matrix.os != 'windows-latest'
+      - name: Build Project (Linux)
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
-        run: cmake --preset ${{ matrix.configure_preset }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
-      # --------------------------------------------------
-      # Build with Presets (Windows)
-      # --------------------------------------------------
-      - name: CMake Build (Preset) [Windows]
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
-        run: cmake --build --preset ${{ matrix.build_preset }}
-
-      # --------------------------------------------------
-      # Build with Presets (Linux/macOS)
-      # --------------------------------------------------
-      - name: CMake Build (Preset) [Unix]
-        if: matrix.os != 'windows-latest'
+      - name: Build Project (macOS)
+        if: matrix.os == 'macos-latest'
         shell: bash
-        run: cmake --build --preset ${{ matrix.build_preset }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake --build build -j$(nproc) --config ${{ matrix.build_type }}
 
-      # --------------------------------------------------
-      # Artifact
-      # --------------------------------------------------
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "rgray-${{ matrix.preset }}-artifact"
+          name: "rgray-${{ matrix.os }}-artifact-${{ matrix.build_type }}"
           path: ${{ github.workspace }}/build/out
