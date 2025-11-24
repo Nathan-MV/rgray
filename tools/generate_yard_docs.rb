@@ -7,16 +7,16 @@ FileUtils.mkdir_p(output_dir)
 def infer_type(param)
   case param
   when /char\s*\*|const\s+char\s*\*/i then 'String'
-  when /\bint\b|\bunsigned\s+int\b|\bINT2NUM\b|\bFIX2INT\b|\bUINT2NUM\b|\bNUM2INT\b/   then 'Integer'
-  when /\bfloat\b|\bdouble\b|\bDBL2NUM\b|\bNUM2FLT\b/         then 'Float'
-  when /\bbool\b|\bTRUE\b|\bFALSE\b|\bQtrue\b|\bQfalse\b/                     then 'Boolean'
-  when /\bconst\s+\w+\s*\*\*/         then 'Array'
-  when /\b\w+\[\]|\b\w+\s*\*/         then 'Array'
+  when /\bint\b|\bunsigned\s+int\b|\bINT2NUM\b|\bFIX2INT\b|\bUINT2NUM\b|\bNUM2INT\b/ then 'Integer'
+  when /\bfloat\b|\bdouble\b|\bDBL2NUM\b|\bNUM2FLT\b/ then 'Float'
+  when /\bbool\b|\bTRUE\b|\bFALSE\b|\bQtrue\b|\bQfalse\b/ then 'Boolean'
+  when /\bconst\s+\w+\s*\*\*/ then 'Array'
+  when /\b\w+\[\]|\b\w+\s*\*/ then 'Array'
   when /Color/ then 'Color'
   when /Vector2/ then 'Vec2'
   when /Vector3/ then 'Vec3'
   when /Vector4/ then 'Vec4'
-  when /Rect/ then 'Rect'
+  when /Rectangle/ then 'Rect'
   else 'void'
   end
 end

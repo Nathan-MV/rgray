@@ -38,7 +38,8 @@ jobs:
             mingw-w64-ucrt-x86_64-ruby
             mingw-w64-ucrt-x86_64-raylib
             mingw-w64-ucrt-x86_64-sccache
-            mingw-w64-ucrt-x86_64-lld
+            mingw-w64-ucrt-x86_64-mold
+            mingw-w64-ucrt-x86_64-clang
             mingw-w64-ucrt-x86_64-clang-tools-extra
             mingw-w64-ucrt-x86_64-cppcheck
             git
@@ -48,7 +49,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake sccache lld cppcheck clang-tidy-15 ninja-build gcc g++ git ruby-full \
+            build-essential cmake sccache mold cppcheck clang-tidy-15 ninja-build gcc g++ git ruby-full \
             libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
             libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
 
@@ -56,7 +57,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install cmake ninja ruby raylib sccache lld cppcheck llvm clang-format
+          brew install cmake ninja ruby raylib sccache mold cppcheck llvm clang-format
 
       - name: Cache CPM Modules
         uses: actions/cache@v4

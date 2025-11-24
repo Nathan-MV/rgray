@@ -1,6 +1,4 @@
 #include "graphics/bitmap_bindings.h"
-#include "ruby_adapter.h"
-#include "ruby_values.h"
 
 VALUE rb_cBitmap;
 
