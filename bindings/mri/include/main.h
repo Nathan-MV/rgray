@@ -5,6 +5,10 @@
 #include "ruby_values.h"
 
 #include "audio/audio_bindings.h"
+#include "audio/audio_stream_bindings.h"
+#include "audio/sound_bindings.h"
+#include "audio/wave_bindings.h"
+#include "audio/music_bindings.h"
 #include "graphics/bitmap_bindings.h"
 #include "graphics/color_bindings.h"
 #include "graphics/draw_bindings.h"

@@ -1,24 +1,24 @@
-# @!method init_device
+# @!method start
 #   Initialize audio device and context
 #   @param void [void]
 #   @return [void]
 
-# @!method close_device
+# @!method exit
 #   Close the audio device and context
 #   @param void [void]
 #   @return [void]
 
-# @!method device_ready?
+# @!method ready?
 #   Check if audio device has been initialized successfully
 #   @param void [void]
 #   @return [Boolean]
 
-# @!method master_volume=
+# @!method volume=
 #   Set master volume (listener)
 #   @param volume [Float]
 #   @return [void]
 
-# @!method master_volume
+# @!method volume
 #   Get master volume (listener)
 #   @param void [void]
 #   @return [Float]

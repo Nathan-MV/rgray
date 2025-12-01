@@ -3,6 +3,6 @@
 #include "rgray/raylib_values.h"
 #include "ruby_adapter.h"
 #include "ruby_values.h"
-#include "wave_bindings.h"
 
-extern "C" void Init_Sound();
+extern VALUE rb_cWave;
+extern "C" void Init_Wave();

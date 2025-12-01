@@ -38,6 +38,10 @@ extern "C" void Init_rgray(void) {
   Init_Bitmap();
   Init_Font();
   Init_Camera();
+  Init_AudioStream();
+  Init_Music();
+  Init_Wave();
+  Init_Sound();
 
   // External
   Init_Gui();

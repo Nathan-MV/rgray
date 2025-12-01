@@ -4,4 +4,4 @@
 #include "ruby_adapter.h"
 #include "ruby_values.h"
 
-// extern "C" void Init_Music();
+extern "C" void Init_Music();

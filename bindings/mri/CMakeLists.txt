@@ -5,6 +5,7 @@ set(SRC_FILES
   src/audio/audio_bindings.cpp
   src/audio/music_bindings.cpp
   src/audio/sound_bindings.cpp
+  src/audio/wave_bindings.cpp
   src/graphics/bitmap_bindings.cpp
   src/graphics/color_bindings.cpp
   src/graphics/draw_bindings.cpp

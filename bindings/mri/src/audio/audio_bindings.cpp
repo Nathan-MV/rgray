@@ -20,9 +20,9 @@ RB_METHOD_FLOAT(rb_get_master_volume, GetMasterVolume)
 extern "C" void Init_Audio() {
   VALUE rb_mAudio = rb_define_module("Audio");
 
-  rb_define_module_function(rb_mAudio, "init_device", rb_init_audio_device, 0);
-  rb_define_module_function(rb_mAudio, "close_device", rb_close_audio_device, 0);
-  rb_define_module_function(rb_mAudio, "device_ready?", rb_is_audio_device_ready, 0);
-  rb_define_module_function(rb_mAudio, "master_volume=", rb_set_master_volume, 1);
-  rb_define_module_function(rb_mAudio, "master_volume", rb_get_master_volume, 0);
+  rb_define_module_function(rb_mAudio, "start", rb_init_audio_device, 0);
+  rb_define_module_function(rb_mAudio, "exit", rb_close_audio_device, 0);
+  rb_define_module_function(rb_mAudio, "ready?", rb_is_audio_device_ready, 0);
+  rb_define_module_function(rb_mAudio, "volume=", rb_set_master_volume, 1);
+  rb_define_module_function(rb_mAudio, "volume", rb_get_master_volume, 0);
 }
